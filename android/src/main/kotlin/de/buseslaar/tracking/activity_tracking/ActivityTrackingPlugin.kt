@@ -1,8 +1,11 @@
 package de.buseslaar.tracking.activity_tracking
 
+import android.app.Activity
+import android.content.Context
 import androidx.annotation.NonNull
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -15,11 +18,17 @@ class ActivityTrackingPlugin: FlutterPlugin, MethodCallHandler {
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
+  /*new*/
+  private lateinit var context: Context
+  /*new*/
+  private lateinit var activity: Activity
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "activity_tracking")
+    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "my_plugin_tuto")
     channel.setMethodCallHandler(this)
+    context = flutterPluginBinding.applicationContext
   }
+
 
   override fun onMethodCall(call: MethodCall, result: Result) {
     if (call.method == "getPlatformVersion") {

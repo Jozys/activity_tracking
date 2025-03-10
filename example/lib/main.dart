@@ -1,3 +1,4 @@
+import 'package:activity_tracking/model/Activity.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -17,6 +18,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
+  String activityRunning = "Unknown";
+  Activity? activity = Activity(activityType: "UNKNOWN", steps: 0);
   final _activityTrackingPlugin = ActivityTracking();
 
   @override
@@ -24,6 +27,38 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     initPlatformState();
   }
+
+  Future<void> startTracking() async {
+    String activity;
+    try {
+       activity = await _activityTrackingPlugin.startActivity("WALKING") ?? "UNKNOWN";
+
+    } on Exception {
+      activity = "Failed to start activity";
+    }
+
+    setState(() {
+      activityRunning = activity;
+    });
+  }
+
+  Future<void> stopTracking() async {
+    Activity? newActivity;
+    String? activityState;
+    try {
+      newActivity = await _activityTrackingPlugin.stopCurrentActivity();
+      print(activity?.steps);
+      activityState = "Stopped";
+    } on Exception {
+      activityState = "Failed to stop";
+      newActivity = Activity(activityType: "UNKNOWN", steps: -1);
+    }
+
+    setState(() {
+      activityRunning = activityState!;
+      activity = newActivity;
+    });
+}
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
@@ -54,8 +89,16 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+        body: Column(
+          children: [
+            Text('Running on: $_platformVersion\n'),
+            FilledButton(onPressed: startTracking, child: Text("Start Tracking")),
+            FilledButton(onPressed: stopTracking, child: Text("StopTracking")),
+            Text('Is Tracking running: ${activityRunning}'),
+
+            Text('Activity: ${activity?.type}'),
+            Text('Steps: ${activity?.steps}'),
+          ],
         ),
       ),
     );

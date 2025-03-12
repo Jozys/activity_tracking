@@ -1,66 +1,42 @@
 package de.buseslaar.tracking.activity_tracking.activitymanager
 
+
 import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorListener
-import android.hardware.SensorManager
 import android.util.Log
-import androidx.compose.foundation.layout.Column
-
-
 import de.buseslaar.tracking.activity_tracking.model.Activity
-import kotlinx.coroutines.suspendCancellableCoroutine
-private const val TAG = "STEP_COUNT_LISTENER"
+import de.buseslaar.tracking.activity_tracking.sensor.StepSensor
+
+private const val TAG = "ACTIVITY_MANAGER"
+
 class ActivityManager {
 
-    private var sensorManager : SensorManager? = null
-    private var sensor: Sensor? = null
     private var currentActivity: Activity? = null
+    private var stepSensor: StepSensor? = null
 
     constructor(newContext: Context) {
-        // = newContext
-        sensorManager = newContext.getSystemService(Context.SENSOR_SERVICE ) as SensorManager;
-        sensor = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
+        stepSensor = StepSensor(newContext, onStepChanged = {
+            onStepChanged(it)
+        })
+
     }
+
     fun startActivity(type: String) {
         currentActivity = Activity(type);
+        stepSensor?.startListening()
         Log.d(TAG, "Current Activity: $currentActivity");
-        val supportedAndEnabled = sensorManager?.registerListener(listener,
-            sensor, SensorManager.SENSOR_DELAY_UI)
-        Log.d(TAG, "Sensor listener registered: $supportedAndEnabled")
     }
 
     fun stopCurrentActivity(): Activity? {
         Log.d(TAG, "Steps: " + currentActivity?.type);//(currentActivity?.steps);
-        if(currentActivity == null) return null;
-        sensorManager?.unregisterListener(listener)
+        if (currentActivity == null) return null;
+        stepSensor?.stopListening();
         return currentActivity;
     }
 
-    private val listener: SensorEventListener by lazy {
-        object : SensorEventListener {
-              override fun onSensorChanged(event: SensorEvent?) {
-                    if (event == null) return
-
-                    val stepsSinceLastReboot = event.values
-                    for (step in stepsSinceLastReboot) {
-                        Log.d(TAG, "Steps: $step")
-                        if(currentActivity != null) {
-                            currentActivity?.steps = currentActivity?.steps?.plus(1)!!
-                        }
-                    }
-                    Log.d(TAG, "Steps since last reboot: $stepsSinceLastReboot")
-
-                }
-
-                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-                    Log.d(TAG, "Accuracy changed to: $accuracy")
-                }
-            }
-        }
-
+    fun onStepChanged(addedSteps: Int) {
+        currentActivity?.steps = currentActivity?.steps?.plus(addedSteps)!!;
+        Log.d(TAG, "Steps: " + currentActivity?.steps);
+    }
 
 
 }

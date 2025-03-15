@@ -1,4 +1,4 @@
-import 'package:activity_tracking/model/Activity.dart';
+import 'package:activity_tracking/model/activity.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:activity_tracking/activity_tracking.dart';
 import 'package:activity_tracking/activity_tracking_platform_interface.dart';

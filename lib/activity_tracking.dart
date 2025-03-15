@@ -1,4 +1,4 @@
-import 'package:activity_tracking/model/Activity.dart';
+import 'package:activity_tracking/model/activity.dart';
 
 import 'activity_tracking_platform_interface.dart';
 

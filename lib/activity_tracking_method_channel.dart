@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:activity_tracking/model/Activity.dart';
+import 'package:activity_tracking/model/activity.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 

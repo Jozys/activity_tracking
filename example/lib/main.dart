@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:activity_tracking/model/Activity.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -22,6 +24,8 @@ class _MyAppState extends State<MyApp> {
   Activity? activity =
       Activity(activityType: "UNKNOWN", steps: 0, locations: {});
   final _activityTrackingPlugin = ActivityTracking();
+  List<Activity> activities = <Activity>[];
+  StreamSubscription? listener;
 
   @override
   void initState() {
@@ -30,36 +34,51 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> startTracking() async {
-    String activity;
+    String activityType;
     try {
-      activity =
+      activityType =
           await _activityTrackingPlugin.startActivity("WALKING") ?? "UNKNOWN";
+      setState(() {
+        listener = _activityTrackingPlugin
+            .getNativeEvents()
+            .listen((e) => setState(() {
+                  activity = Activity.fromJson(jsonDecode(e));
+                }));
+      });
     } on Exception {
-      activity = "Failed to start activity";
+      activityType = "Failed to start activity";
     }
 
     setState(() {
-      activityRunning = activity;
+      activityRunning = activityType;
     });
   }
 
   Future<void> stopTracking() async {
     Activity? newActivity;
     String? activityState;
+    List<Activity> newActivities = activities;
     try {
       newActivity = await _activityTrackingPlugin.stopCurrentActivity();
+      if (newActivity != null) {
+        newActivities.add(newActivity);
+      }
+
       activityState = "Stopped";
     } on Exception {
       activityState = "Failed to stop";
       newActivity = Activity(activityType: "UNKNOWN", steps: -1, locations: {});
     }
+    listener?.cancel();
 
     setState(() {
       activityRunning = activityState!;
       activity = Activity(
-          activityType: newActivity?.activityType,
-          locations: newActivity?.locations,
-          steps: newActivity?.steps);
+        activityType: "UNKNOWN",
+        steps: 0,
+      );
+      listener = null;
+      activities = newActivities;
     });
   }
 
@@ -89,22 +108,71 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Column(
-          children: [
-            Text('Running on: $_platformVersion\n'),
-            FilledButton(
-                onPressed: startTracking, child: Text("Start Tracking")),
-            FilledButton(onPressed: stopTracking, child: Text("StopTracking")),
-            Text('Is Tracking running: ${activityRunning}'),
-            Text('Activity: ${activity?.activityType}'),
-            Text('Steps: ${activity?.steps}'),
-            Text('Locations: ${activity?.locations?.length}')
-          ],
-        ),
-      ),
+          appBar: AppBar(
+            title: const Text('Plugin example app'),
+            actions: [
+              FilledButton(
+                  onPressed: startTracking,
+                  child: const Text("Start Tracking")),
+              FilledButton(
+                  onPressed: stopTracking, child: const Text("StopTracking")),
+            ],
+          ),
+          body: Container(
+            child: Column(
+              children: [
+                Expanded(child: _buildList(context, activities)),
+                Row(children: [
+                  Column(children: [
+                    Text('Is Tracking running: ${activityRunning}'),
+                    Text('Activity: ${activity?.activityType}'),
+                    Text('Steps: ${activity?.steps}'),
+                    Text('Locations: ${activity?.locations?.length}'),
+                  ]),
+                ]),
+              ],
+            ),
+          )),
+    );
+  }
+
+  Widget _buildList(BuildContext context, List<Activity> activities) {
+    print(activities);
+    return RefreshIndicator(
+        color: Colors.white,
+        backgroundColor: Colors.blue,
+        onRefresh: () async {},
+        child: activities.isNotEmpty
+            ? ListView.builder(
+                itemCount: activities.length,
+                itemBuilder: (context, index) {
+                  final activity = activities[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: _buildListItem(context, activity),
+                  );
+                })
+            : const Text("Hallo Welt"));
+  }
+
+  Widget _buildListItem(BuildContext context, Activity activity) {
+    return ListTile(
+      minTileHeight: 120,
+      title: Text("Activity type: ${activity.activityType ?? "UNKNOWN"}"),
+      isThreeLine: true,
+      subtitle: Column(children: [
+        Text(DateTime.fromMillisecondsSinceEpoch(activity.startDateTime ?? 0)
+            .toIso8601String()),
+        Text(DateTime.fromMillisecondsSinceEpoch(activity.endDateTime ?? 0)
+            .toIso8601String()),
+        Text("Activity type: ${activity.activityType ?? "UNKNOWN"}"),
+        Text("Steps ${activity.steps.toString()}"),
+        Text("Locations: ${activity.locations?.length}")
+      ]),
+      trailing: CircleAvatar(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          child: Text("Hallo Welt"),
+          foregroundColor: Theme.of(context).colorScheme.onPrimary),
     );
   }
 }

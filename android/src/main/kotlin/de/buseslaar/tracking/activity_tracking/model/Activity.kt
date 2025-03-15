@@ -9,9 +9,14 @@ class Activity {
 
     var locations: HashMap<Long, Location> = HashMap()
 
+    var startDateTime: Long? = null;
+
+    var endDateTime: Long? = null;
+
     constructor(activityType: String) {
         type = activityType
         steps = 0
+        startDateTime = System.currentTimeMillis()
     }
 
     fun addLocation(millis: Long, location: Location) {
@@ -21,6 +26,8 @@ class Activity {
     fun parseToJSON(): String {
         var json = """
             {
+                "startDateTime": $startDateTime,
+                "endDateTime": $endDateTime,
                 "type": "$type",
                 "steps": $steps,
                 "locations": {${parseHashMapToJson()}}}

@@ -9,6 +9,7 @@ import androidx.annotation.RequiresPermission
 import de.buseslaar.tracking.activity_tracking.model.Activity
 import de.buseslaar.tracking.activity_tracking.sensor.LocationSensor
 import de.buseslaar.tracking.activity_tracking.sensor.StepSensor
+import io.flutter.plugin.common.EventChannel
 
 private const val TAG = "ACTIVITY_MANAGER"
 
@@ -17,12 +18,13 @@ class ActivityManager {
     private var currentActivity: Activity? = null
     private var stepSensor: StepSensor? = null
     private var locationSensor: LocationSensor? = null
+    var eventSink: EventChannel.EventSink? = null
 
     constructor(newContext: Context) {
-        stepSensor = StepSensor(newContext, onStepChanged = {
+        this.stepSensor = StepSensor(newContext, onStepChanged = {
             onStepChanged(it)
         })
-        locationSensor = LocationSensor(newContext, onLocationUpdatedListener = {
+        this.locationSensor = LocationSensor(newContext, onLocationUpdatedListener = {
             onLocationChanged(it)
         })
 
@@ -39,6 +41,7 @@ class ActivityManager {
     fun stopCurrentActivity(): Activity? {
         Log.d(TAG, "Steps: " + currentActivity?.type)//(currentActivity?.steps);
         if (currentActivity == null) return null
+        currentActivity?.endDateTime = System.currentTimeMillis()
         stepSensor?.stopListening()
         locationSensor?.stopLocationUpdates()
         return currentActivity
@@ -47,11 +50,13 @@ class ActivityManager {
     fun onStepChanged(addedSteps: Int) {
         currentActivity?.steps = currentActivity?.steps?.plus(addedSteps)!!
         Log.d(TAG, "Steps: " + currentActivity?.steps)
+        eventSink?.success(currentActivity?.parseToJSON());
     }
 
     fun onLocationChanged(locations: List<Location>) {
         for (location in locations) {
             Log.d(TAG, location.longitude.toString())
+
             currentActivity?.addLocation(
                 location.time,
                 de.buseslaar.tracking.activity_tracking.model.Location(
@@ -61,6 +66,9 @@ class ActivityManager {
                 )
             )
         }
+        Log.d("ACTIVITY_MANAGER", "Current Activity: $currentActivity")
+        Log.d("ACTIVITY_MANAGER", "Current Activity: $eventSink")
+        eventSink?.success(currentActivity?.parseToJSON());
     }
 
 }

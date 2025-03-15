@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.annotation.RequiresPermission
 import de.buseslaar.tracking.activity_tracking.activitymanager.ActivityManager
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -18,22 +19,35 @@ class ActivityTrackingPlugin : FlutterPlugin, MethodCallHandler {
     /// This local reference serves to register the plugin with the Flutter Engine and unregister it
     /// when the Flutter Engine is detached from the Activity
     private lateinit var channel: MethodChannel
+    private lateinit var eventChannel: EventChannel
 
     private lateinit var context: Context
 
     private lateinit var activityManager: ActivityManager
-
+    private var eventSink: EventChannel.EventSink? = null
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         context = flutterPluginBinding.applicationContext
         var context = flutterPluginBinding.applicationContext
         this.context = context.applicationContext
+        this.eventChannel =
+            EventChannel(flutterPluginBinding.binaryMessenger, "activity_tracking/channel")
+        this.eventChannel.setStreamHandler(object : EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink) {
+                eventSink = events
+                activityManager.eventSink = eventSink
+            }
+
+            override fun onCancel(arguments: Any?) {
+                eventSink = null
+            }
+        })
         this.activityManager = ActivityManager(context.applicationContext)
 
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "activity_tracking")
         channel.setMethodCallHandler(this)
-    }
 
+    }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -51,7 +65,6 @@ class ActivityTrackingPlugin : FlutterPlugin, MethodCallHandler {
             "stopCurrentActivity" -> {
                 var activity = activityManager.stopCurrentActivity()
                 if (activity != null) {
-                    // TODO: Improve data type mapping, because communication can only handle native types
                     result.success(activity.parseToJSON())
                 } else {
                     result.error("Error", "Stopping Activity failed", null)

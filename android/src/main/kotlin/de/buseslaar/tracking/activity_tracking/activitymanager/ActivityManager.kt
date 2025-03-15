@@ -10,6 +10,7 @@ import de.buseslaar.tracking.activity_tracking.model.Activity
 import de.buseslaar.tracking.activity_tracking.sensor.LocationSensor
 import de.buseslaar.tracking.activity_tracking.sensor.StepSensor
 import io.flutter.plugin.common.EventChannel
+import org.json.JSONObject
 
 private const val TAG = "ACTIVITY_MANAGER"
 
@@ -31,11 +32,11 @@ class ActivityManager {
     }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    fun startActivity(type: String) {
+    fun startActivity(type: String): String {
         currentActivity = Activity(type)
         stepSensor?.startListening()
         locationSensor?.startLocationUpdates()
-        Log.d(TAG, "Current Activity: $currentActivity")
+        return type;
     }
 
     fun stopCurrentActivity(): Activity? {
@@ -50,7 +51,7 @@ class ActivityManager {
     fun onStepChanged(addedSteps: Int) {
         currentActivity?.steps = currentActivity?.steps?.plus(addedSteps)!!
         Log.d(TAG, "Steps: " + currentActivity?.steps)
-        eventSink?.success(currentActivity?.parseToJSON());
+        eventSink?.success(constructJsonString<Int>("step", addedSteps));
     }
 
     fun onLocationChanged(locations: List<Location>) {
@@ -65,10 +66,37 @@ class ActivityManager {
                     location.altitude
                 )
             )
+            eventSink?.success(constructJsonString<Location>("location", location));
         }
-        Log.d("ACTIVITY_MANAGER", "Current Activity: $currentActivity")
-        Log.d("ACTIVITY_MANAGER", "Current Activity: $eventSink")
-        eventSink?.success(currentActivity?.parseToJSON());
+    }
+
+    private fun <T> constructJsonString(key: String, data: T): String {
+        var json = JSONObject();
+        json.put("type", key);
+        when (key) {
+            "step" -> {
+                json.put("data", data);
+            }
+
+            "location" -> {
+                var rawLocationData = data as Location;
+                val locationData = JSONObject();
+                locationData.put("latitude", rawLocationData.latitude);
+                locationData.put("longitude", rawLocationData.longitude);
+                locationData.put("altitude", rawLocationData.altitude);
+                val locationTime = JSONObject();
+                locationTime.put(rawLocationData.time.toString(), locationData);
+                json.put("data", locationTime);
+            }
+
+            else -> {
+                var error = JSONObject();
+                error.put("type", "error");
+                error.put("error", "Invalid data type");
+                return error.toString();
+            }
+        }
+        return json.toString();
     }
 
 }

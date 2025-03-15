@@ -58,8 +58,9 @@ class ActivityTrackingPlugin : FlutterPlugin, MethodCallHandler {
             }
 
             "startActivity" -> {
-                activityManager.startActivity(call.argument<String>("type").toString())
-                result.success("Starting Activity")
+                var activityType =
+                    activityManager.startActivity(call.argument<String>("type").toString())
+                result.success(activityType)
             }
 
             "stopCurrentActivity" -> {

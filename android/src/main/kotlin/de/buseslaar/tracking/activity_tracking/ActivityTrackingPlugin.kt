@@ -1,6 +1,9 @@
 package de.buseslaar.tracking.activity_tracking
 
+import android.Manifest
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresPermission
 import de.buseslaar.tracking.activity_tracking.activitymanager.ActivityManager
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -32,30 +35,26 @@ class ActivityTrackingPlugin : FlutterPlugin, MethodCallHandler {
     }
 
 
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onMethodCall(call: MethodCall, result: Result) {
-        var activityManager = this.activityManager;
+        var activityManager = this.activityManager
         when (call.method) {
             "getPlatformVersion" -> {
-                result.success("Android ${android.os.Build.VERSION.RELEASE}")
+                result.success("Android ${Build.VERSION.RELEASE}")
             }
 
             "startActivity" -> {
-                activityManager.startActivity(call.argument<String>("type").toString());
-                result.success("Starting Activity");
+                activityManager.startActivity(call.argument<String>("type").toString())
+                result.success("Starting Activity")
             }
 
             "stopCurrentActivity" -> {
-                var activity = activityManager.stopCurrentActivity();
+                var activity = activityManager.stopCurrentActivity()
                 if (activity != null) {
                     // TODO: Improve data type mapping, because communication can only handle native types
-                    result.success(
-                        mapOf(
-                            "type" to activity.type.toString(),
-                            "steps" to activity.steps.toString()
-                        ) as Map<String, String>
-                    );
+                    result.success(activity.parseToJSON())
                 } else {
-                    result.error("Error", "Stopping Activity failed", null);
+                    result.error("Error", "Stopping Activity failed", null)
                 }
             }
 

@@ -1,6 +1,8 @@
 import 'dart:convert';
 
-import 'package:activity_tracking/model/Activity.dart';
+import 'package:activity_tracking/model/Location.dart';
+import 'package:activity_tracking/model/activity.dart';
+import 'package:activity_tracking/model/message.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -41,16 +43,32 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         listener = _activityTrackingPlugin
             .getNativeEvents()
-            .listen((e) => setState(() {
-                  activity = Activity.fromJson(jsonDecode(e));
-                }));
+            .listen(eventMessageListener);
       });
     } on Exception {
-      activityType = "Failed to start activity";
+      activityType = "UNKNOWN";
     }
+    activity?.activityType = activityType;
 
     setState(() {
-      activityRunning = activityType;
+      activityRunning = activityType != "UNKNOWN" ? "Yes" : "No";
+      activity = activity;
+    });
+  }
+
+  void eventMessageListener(dynamic e) {
+    var eventMessage = Message.fromJson(jsonDecode(e));
+    switch (eventMessage.type) {
+      case "step":
+        activity?.steps =
+            ((activity?.steps ?? 0) + (eventMessage.data ?? 0)) as int?;
+      case "location":
+        if (eventMessage.data != null) {
+          activity?.locations?.addAll(eventMessage.data);
+        }
+    }
+    setState(() {
+      activity = activity;
     });
   }
 
@@ -73,10 +91,7 @@ class _MyAppState extends State<MyApp> {
 
     setState(() {
       activityRunning = activityState!;
-      activity = Activity(
-        activityType: "UNKNOWN",
-        steps: 0,
-      );
+      activity = Activity(activityType: "UNKNOWN", steps: 0, locations: {});
       listener = null;
       activities = newActivities;
     });
@@ -137,7 +152,6 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget _buildList(BuildContext context, List<Activity> activities) {
-    print(activities);
     return RefreshIndicator(
         color: Colors.white,
         backgroundColor: Colors.blue,

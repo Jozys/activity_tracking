@@ -7,8 +7,15 @@ class Activity {
   String? activityType;
   int? steps = 0;
   Map<DateTime, Location>? locations = {};
+  int? startDateTime = 0;
+  int? endDateTime = 0;
 
-  Activity({this.activityType, this.steps, this.locations});
+  Activity(
+      {this.activityType,
+      this.steps,
+      this.locations,
+      this.startDateTime,
+      this.endDateTime});
 
   factory Activity.fromJson(Map<String, dynamic> json) {
     var rawLocations = json["locations"] as Map<String, dynamic>;
@@ -20,6 +27,10 @@ class Activity {
           altitude: value["altitude"]);
     });
     return Activity(
-        activityType: json["type"], locations: locations, steps: json["steps"]);
+        startDateTime: json["startDateTime"],
+        endDateTime: json["endDateTime"],
+        activityType: json["type"],
+        locations: locations,
+        steps: json["steps"]);
   }
 }

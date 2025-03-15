@@ -14,4 +14,8 @@ class ActivityTracking {
   Future<Activity?> stopCurrentActivity() {
     return ActivityTrackingPlatform.instance.stopCurrentActivity();
   }
+
+  Stream<dynamic> getNativeEvents() {
+    return ActivityTrackingPlatform.instance.getNativeEvents();
+  }
 }

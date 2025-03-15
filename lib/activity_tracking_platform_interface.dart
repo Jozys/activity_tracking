@@ -32,7 +32,11 @@ abstract class ActivityTrackingPlatform extends PlatformInterface {
     throw UnimplementedError("startActivity() has not been implemented");
   }
 
-  Future<Activity?> stopCurrentActivity(){
+  Future<Activity?> stopCurrentActivity() {
     throw UnimplementedError("stopCurrentActivity has not been implemented");
+  }
+
+  Stream<dynamic> getNativeEvents() {
+    throw UnimplementedError("getNativeEvents has not been implemented");
   }
 }

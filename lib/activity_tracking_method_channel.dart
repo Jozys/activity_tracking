@@ -11,6 +11,7 @@ class MethodChannelActivityTracking extends ActivityTrackingPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
   final methodChannel = const MethodChannel('activity_tracking');
+  final _eventChannel = const EventChannel("activity_tracking/channel");
 
   @override
   Future<String?> getPlatformVersion() async {
@@ -40,5 +41,9 @@ class MethodChannelActivityTracking extends ActivityTrackingPlatform {
         activityType: "UNKNOWN",
       );
     }
+  }
+
+  Stream<dynamic> getNativeEvents() {
+    return _eventChannel.receiveBroadcastStream();
   }
 }

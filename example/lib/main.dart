@@ -19,7 +19,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   String activityRunning = "Unknown";
-  Activity? activity = Activity(activityType: "UNKNOWN", steps: 0);
+  Activity? activity =
+      Activity(activityType: "UNKNOWN", steps: 0, locations: {});
   final _activityTrackingPlugin = ActivityTracking();
 
   @override
@@ -31,8 +32,8 @@ class _MyAppState extends State<MyApp> {
   Future<void> startTracking() async {
     String activity;
     try {
-       activity = await _activityTrackingPlugin.startActivity("WALKING") ?? "UNKNOWN";
-
+      activity =
+          await _activityTrackingPlugin.startActivity("WALKING") ?? "UNKNOWN";
     } on Exception {
       activity = "Failed to start activity";
     }
@@ -47,18 +48,20 @@ class _MyAppState extends State<MyApp> {
     String? activityState;
     try {
       newActivity = await _activityTrackingPlugin.stopCurrentActivity();
-      print(activity?.steps);
       activityState = "Stopped";
     } on Exception {
       activityState = "Failed to stop";
-      newActivity = Activity(activityType: "UNKNOWN", steps: -1);
+      newActivity = Activity(activityType: "UNKNOWN", steps: -1, locations: {});
     }
 
     setState(() {
       activityRunning = activityState!;
-      activity = newActivity;
+      activity = Activity(
+          activityType: newActivity?.activityType,
+          locations: newActivity?.locations,
+          steps: newActivity?.steps);
     });
-}
+  }
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
@@ -66,8 +69,8 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      platformVersion =
-          await _activityTrackingPlugin.getPlatformVersion() ?? 'Unknown platform version';
+      platformVersion = await _activityTrackingPlugin.getPlatformVersion() ??
+          'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -92,12 +95,13 @@ class _MyAppState extends State<MyApp> {
         body: Column(
           children: [
             Text('Running on: $_platformVersion\n'),
-            FilledButton(onPressed: startTracking, child: Text("Start Tracking")),
+            FilledButton(
+                onPressed: startTracking, child: Text("Start Tracking")),
             FilledButton(onPressed: stopTracking, child: Text("StopTracking")),
             Text('Is Tracking running: ${activityRunning}'),
-
-            Text('Activity: ${activity?.type}'),
+            Text('Activity: ${activity?.activityType}'),
             Text('Steps: ${activity?.steps}'),
+            Text('Locations: ${activity?.locations?.length}')
           ],
         ),
       ),

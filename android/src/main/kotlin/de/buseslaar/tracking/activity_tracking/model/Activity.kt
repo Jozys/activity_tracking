@@ -31,6 +31,7 @@ class Activity {
                 "startDateTime": $startDateTime,
                 "endDateTime": $endDateTime,
                 "type": "$type",
+                "distance": $distance,
                 "steps": $steps,
                 "locations": {${parseHashMapToJson()}}}
         """.trimIndent()

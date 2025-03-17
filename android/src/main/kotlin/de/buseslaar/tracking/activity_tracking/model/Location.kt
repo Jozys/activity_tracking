@@ -22,7 +22,7 @@ class Location {
                 "latitude": $latitude,
                 "longitude": $longitude,
                 "altitude": $altitude,
-                "speed": $speed
+                "speed": ${speed.toDouble()}
             }"""
     }
 

@@ -116,6 +116,12 @@ class ActivityManager {
                 generateNotificationDescription()
             );
             eventSink?.success(constructJsonString<Location>("location", location));
+            eventSink?.success(
+                constructJsonString<Double?>(
+                    "distance",
+                    currentActivity?.distance
+                )
+            )
         }
     }
 
@@ -140,9 +146,14 @@ class ActivityManager {
                 locationData.put("latitude", rawLocationData.latitude);
                 locationData.put("longitude", rawLocationData.longitude);
                 locationData.put("altitude", rawLocationData.altitude);
+                locationData.put("speed", rawLocationData.speed.toDouble());
                 val locationTime = JSONObject();
                 locationTime.put(rawLocationData.time.toString(), locationData);
                 json.put("data", locationTime);
+            }
+
+            "distance" -> {
+                json.put("data", data);
             }
 
             else -> {

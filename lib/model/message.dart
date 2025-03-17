@@ -15,11 +15,14 @@ class Message<T> {
         var rawLocations = json["data"] as Map<String, dynamic>;
         var locations = <DateTime, Location>{};
         rawLocations.forEach((key, value) {
+          print(value);
           locations[DateTime.fromMillisecondsSinceEpoch(int.parse(key))] =
               Location(
-                  latitude: value["latitude"],
-                  longitude: value["longitude"],
-                  altitude: value["altitude"]);
+            latitude: value["latitude"],
+            longitude: value["longitude"],
+            altitude: value["altitude"],
+            speed: value["speed"],
+          );
         });
         return Message(type: type, data: locations as T);
       default:

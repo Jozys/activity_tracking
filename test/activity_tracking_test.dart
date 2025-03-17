@@ -1,4 +1,4 @@
-import 'package:activity_tracking/model/Activity.dart';
+import 'package:activity_tracking/model/activity.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:activity_tracking/activity_tracking.dart';
 import 'package:activity_tracking/activity_tracking_platform_interface.dart';
@@ -8,7 +8,6 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 class MockActivityTrackingPlatform
     with MockPlatformInterfaceMixin
     implements ActivityTrackingPlatform {
-
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
 
@@ -23,10 +22,17 @@ class MockActivityTrackingPlatform
     // TODO: implement stopCurrentActivity
     throw UnimplementedError();
   }
+
+  @override
+  Stream getNativeEvents() {
+    // TODO: implement getNativeEvents
+    throw UnimplementedError();
+  }
 }
 
 void main() {
-  final ActivityTrackingPlatform initialPlatform = ActivityTrackingPlatform.instance;
+  final ActivityTrackingPlatform initialPlatform =
+      ActivityTrackingPlatform.instance;
 
   test('$MethodChannelActivityTracking is the default instance', () {
     expect(initialPlatform, isInstanceOf<MethodChannelActivityTracking>());

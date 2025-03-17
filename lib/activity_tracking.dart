@@ -1,4 +1,4 @@
-import 'package:activity_tracking/model/Activity.dart';
+import 'package:activity_tracking/model/activity.dart';
 
 import 'activity_tracking_platform_interface.dart';
 
@@ -13,5 +13,9 @@ class ActivityTracking {
 
   Future<Activity?> stopCurrentActivity() {
     return ActivityTrackingPlatform.instance.stopCurrentActivity();
+  }
+
+  Stream<dynamic> getNativeEvents() {
+    return ActivityTrackingPlatform.instance.getNativeEvents();
   }
 }

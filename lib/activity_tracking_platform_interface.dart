@@ -1,4 +1,4 @@
-import 'package:activity_tracking/model/Activity.dart';
+import 'package:activity_tracking/model/activity.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'activity_tracking_method_channel.dart';
@@ -32,7 +32,11 @@ abstract class ActivityTrackingPlatform extends PlatformInterface {
     throw UnimplementedError("startActivity() has not been implemented");
   }
 
-  Future<Activity?> stopCurrentActivity(){
+  Future<Activity?> stopCurrentActivity() {
     throw UnimplementedError("stopCurrentActivity has not been implemented");
+  }
+
+  Stream<dynamic> getNativeEvents() {
+    throw UnimplementedError("getNativeEvents has not been implemented");
   }
 }

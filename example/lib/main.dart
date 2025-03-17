@@ -21,10 +21,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
   String activityRunning = "Unknown";
   Activity? activity =
-      Activity(activityType: "UNKNOWN", steps: 0, locations: {});
+      Activity(activityType: "UNKNOWN", steps: 0, locations: {}, distance: 0.0);
   final _activityTrackingPlugin = ActivityTracking();
   List<Activity> activities = <Activity>[];
   StreamSubscription? listener;
@@ -32,7 +31,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initPlatformState();
   }
 
   Future<void> startTracking() async {
@@ -66,6 +64,10 @@ class _MyAppState extends State<MyApp> {
         if (eventMessage.data != null) {
           activity?.locations?.addAll(eventMessage.data);
         }
+      case "distance":
+        if (eventMessage.data != null && eventMessage.data != 0) {
+          activity?.distance = eventMessage.data;
+        }
     }
     setState(() {
       activity = activity;
@@ -85,37 +87,17 @@ class _MyAppState extends State<MyApp> {
       activityState = "Stopped";
     } on Exception {
       activityState = "Failed to stop";
-      newActivity = Activity(activityType: "UNKNOWN", steps: -1, locations: {});
+      newActivity = Activity(
+          activityType: "UNKNOWN", steps: -1, locations: {}, distance: 0.0);
     }
     listener?.cancel();
 
     setState(() {
       activityRunning = activityState!;
-      activity = Activity(activityType: "UNKNOWN", steps: 0, locations: {});
+      activity = Activity(
+          activityType: "UNKNOWN", steps: 0, locations: {}, distance: 0.0);
       listener = null;
       activities = newActivities;
-    });
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion = await _activityTrackingPlugin.getPlatformVersion() ??
-          'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
     });
   }
 
@@ -143,6 +125,10 @@ class _MyAppState extends State<MyApp> {
                     Text('Activity: ${activity?.activityType}'),
                     Text('Steps: ${activity?.steps}'),
                     Text('Locations: ${activity?.locations?.length}'),
+                    Text('Distance: ${activity?.distance?.toString()}'),
+                    /*  if (activity != null && activity?.locations != null)
+                      Text(
+                          'Speed: ${activity?.locations?.values.last.speed} km/h') */
                   ]),
                 ]),
               ],
@@ -170,6 +156,15 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget _buildListItem(BuildContext context, Activity activity) {
+    double calculateAverageSpeed(Map<DateTime, Location> locations) {
+      double sum = 0.0;
+      locations.forEach((datetime, location) {
+        sum += location.speed;
+      });
+
+      return ((sum / locations.length) * 100).roundToDouble() / 100;
+    }
+
     return ListTile(
       minTileHeight: 120,
       title: Text("Activity type: ${activity.activityType ?? "UNKNOWN"}"),
@@ -181,7 +176,10 @@ class _MyAppState extends State<MyApp> {
             .toIso8601String()),
         Text("Activity type: ${activity.activityType ?? "UNKNOWN"}"),
         Text("Steps ${activity.steps.toString()}"),
-        Text("Locations: ${activity.locations?.length}")
+        Text("Locations: ${activity.locations?.length}"),
+        Text(
+            "Average Speed:  ${calculateAverageSpeed(activity.locations ?? {})} km/h"),
+        Text("Distance: ${activity.distance} km")
       ]),
       trailing: CircleAvatar(
           backgroundColor: Theme.of(context).colorScheme.primary,

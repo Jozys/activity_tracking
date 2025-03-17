@@ -16,6 +16,7 @@ import de.buseslaar.tracking.activity_tracking.sensor.StepSensor
 import de.buseslaar.tracking.activity_tracking.service.WalkingForegroundService
 import io.flutter.plugin.common.EventChannel
 import org.json.JSONObject
+import kotlin.math.roundToInt
 
 private const val TAG = "ACTIVITY_MANAGER"
 
@@ -62,16 +63,15 @@ class ActivityManager {
             locationSensor?.stopLocationUpdates()
         });
 
-        // Send notification with activity data
         var notificationManager =
             context?.getSystemService(NOTIFICATION_SERVICE) as NotificationManager;
         notificationManager.notify(
             System.currentTimeMillis().toInt(), NotificationsHelper.buildNotification(
                 context!!,
                 "Finished: ${currentActivity?.type.toString()}",
-                "Steps: ${currentActivity?.steps.toString()}",
+                generateNotificationDescription()
 
-                )
+            )
         );
         return currentActivity
     }
@@ -83,24 +83,47 @@ class ActivityManager {
         this.foregroundService?.updateNotification(
             context!!,
             currentActivity?.type.toString(),
-            "Steps: " + currentActivity?.steps
+            generateNotificationDescription()
         );
     }
 
     fun onLocationChanged(locations: List<Location>) {
         for (location in locations) {
             Log.d(TAG, location.longitude.toString())
-
+            if (currentActivity != null && currentActivity!!.locations.isNotEmpty()) {
+                val lastLocation = currentActivity?.locations?.values?.last();
+                if (lastLocation == null) {
+                    continue;
+                }
+                if (lastLocation.latitude == location.latitude && lastLocation.longitude == location.longitude) {
+                    continue;
+                }
+                currentActivity?.distance =
+                    (currentActivity?.distance?.plus(lastLocation.distanceTo(location))!! * 1000.0).roundToInt() / 1000.0;
+            }
             currentActivity?.addLocation(
                 location.time,
                 de.buseslaar.tracking.activity_tracking.model.Location(
                     location.latitude,
                     location.longitude,
-                    location.altitude
+                    location.altitude,
+                    location.speed
                 )
             )
+            this.foregroundService?.updateNotification(
+                context!!,
+                currentActivity?.type.toString(),
+                generateNotificationDescription()
+            );
             eventSink?.success(constructJsonString<Location>("location", location));
         }
+    }
+
+    fun generateNotificationDescription(): String {
+        return "Steps: " + currentActivity?.steps.toString() + " Speed: " + ((currentActivity?.locations?.values?.last()?.speed?.times(
+            3.6F
+        )?.times(10.0))?.roundToInt()
+            ?.div(10.0)).toString() + " km/h; Distance: " + (currentActivity?.distance).toString() + " km";
     }
 
     private fun <T> constructJsonString(key: String, data: T): String {
@@ -133,3 +156,4 @@ class ActivityManager {
     }
 
 }
+

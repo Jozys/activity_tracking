@@ -13,6 +13,8 @@ class Activity {
 
     var endDateTime: Long? = null;
 
+    var distance: Double = 0.0
+
     constructor(activityType: ActivityType) {
         type = activityType
         steps = 0

@@ -2,13 +2,18 @@ package de.buseslaar.tracking.activity_tracking.activitymanager
 
 
 import android.Manifest
+import android.app.NotificationManager
 import android.content.Context
+import android.content.Context.NOTIFICATION_SERVICE
 import android.location.Location
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import de.buseslaar.tracking.activity_tracking.model.Activity
+import de.buseslaar.tracking.activity_tracking.model.ActivityType
+import de.buseslaar.tracking.activity_tracking.notification.NotificationsHelper
 import de.buseslaar.tracking.activity_tracking.sensor.LocationSensor
 import de.buseslaar.tracking.activity_tracking.sensor.StepSensor
+import de.buseslaar.tracking.activity_tracking.service.WalkingForegroundService
 import io.flutter.plugin.common.EventChannel
 import org.json.JSONObject
 
@@ -20,6 +25,8 @@ class ActivityManager {
     private var stepSensor: StepSensor? = null
     private var locationSensor: LocationSensor? = null
     var eventSink: EventChannel.EventSink? = null
+    var context: Context? = null;
+    var foregroundService: WalkingForegroundService? = null;
 
     constructor(newContext: Context) {
         this.stepSensor = StepSensor(newContext, onStepChanged = {
@@ -28,23 +35,44 @@ class ActivityManager {
         this.locationSensor = LocationSensor(newContext, onLocationUpdatedListener = {
             onLocationChanged(it)
         })
+        this.context = newContext;
 
     }
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     fun startActivity(type: String): String {
-        currentActivity = Activity(type)
-        stepSensor?.startListening()
-        locationSensor?.startLocationUpdates()
+        currentActivity = Activity(ActivityType.valueOf(type))
+        if (context != null) {
+            this.foregroundService = WalkingForegroundService(context!!)
+            this.foregroundService?.startService(context!!, {
+                this.stepSensor?.startListening();
+                this.locationSensor?.startLocationUpdates();
+            });
+        }
         return type;
     }
 
     fun stopCurrentActivity(): Activity? {
-        Log.d(TAG, "Steps: " + currentActivity?.type)//(currentActivity?.steps);
+        Log.d(TAG, "Current Activity: " + currentActivity?.type)//(currentActivity?.steps);
         if (currentActivity == null) return null
         currentActivity?.endDateTime = System.currentTimeMillis()
-        stepSensor?.stopListening()
-        locationSensor?.stopLocationUpdates()
+
+        this.foregroundService?.stopService(context!!, {
+            stepSensor?.stopListening()
+            locationSensor?.stopLocationUpdates()
+        });
+
+        // Send notification with activity data
+        var notificationManager =
+            context?.getSystemService(NOTIFICATION_SERVICE) as NotificationManager;
+        notificationManager.notify(
+            System.currentTimeMillis().toInt(), NotificationsHelper.buildNotification(
+                context!!,
+                "Finished: ${currentActivity?.type.toString()}",
+                "Steps: ${currentActivity?.steps.toString()}",
+
+                )
+        );
         return currentActivity
     }
 
@@ -52,6 +80,11 @@ class ActivityManager {
         currentActivity?.steps = currentActivity?.steps?.plus(addedSteps)!!
         Log.d(TAG, "Steps: " + currentActivity?.steps)
         eventSink?.success(constructJsonString<Int>("step", addedSteps));
+        this.foregroundService?.updateNotification(
+            context!!,
+            currentActivity?.type.toString(),
+            "Steps: " + currentActivity?.steps
+        );
     }
 
     fun onLocationChanged(locations: List<Location>) {

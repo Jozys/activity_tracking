@@ -1,6 +1,8 @@
 package de.buseslaar.tracking.activity_tracking.model
 
-class Activity {
+import android.content.Context
+
+abstract class Activity {
 
     // TODO: Change type to Health Connect types
     var type: ActivityType? = null
@@ -47,5 +49,9 @@ class Activity {
         }
         return json
     }
+
+    abstract fun startSensors(context: Context)
+
+    abstract fun stopSensors(context: Context)
 }
 

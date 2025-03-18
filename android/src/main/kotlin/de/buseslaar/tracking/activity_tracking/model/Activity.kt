@@ -3,7 +3,7 @@ package de.buseslaar.tracking.activity_tracking.model
 class Activity {
 
     // TODO: Change type to Health Connect types
-    var type: String? = null
+    var type: ActivityType? = null
 
     var steps: Int = 0
 
@@ -13,7 +13,9 @@ class Activity {
 
     var endDateTime: Long? = null;
 
-    constructor(activityType: String) {
+    var distance: Double = 0.0
+
+    constructor(activityType: ActivityType) {
         type = activityType
         steps = 0
         startDateTime = System.currentTimeMillis()
@@ -29,6 +31,7 @@ class Activity {
                 "startDateTime": $startDateTime,
                 "endDateTime": $endDateTime,
                 "type": "$type",
+                "distance": $distance,
                 "steps": $steps,
                 "locations": {${parseHashMapToJson()}}}
         """.trimIndent()

@@ -33,11 +33,11 @@ class _MyAppState extends State<MyApp> {
     super.initState();
   }
 
-  Future<void> startTracking() async {
+  Future<void> startTracking(String type) async {
     String activityType;
     try {
       activityType =
-          await _activityTrackingPlugin.startActivity("WALKING") ?? "UNKNOWN";
+          await _activityTrackingPlugin.startActivity(type) ?? "UNKNOWN";
       setState(() {
         listener = _activityTrackingPlugin
             .getNativeEvents()
@@ -109,15 +109,29 @@ class _MyAppState extends State<MyApp> {
             title: const Text('Plugin example app'),
             actions: [
               FilledButton(
-                  onPressed: startTracking,
-                  child: const Text("Start Tracking")),
-              FilledButton(
                   onPressed: stopTracking, child: const Text("StopTracking")),
             ],
           ),
           body: Container(
             child: Column(
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FilledButton(
+                      onPressed: () => startTracking("RUNNING"),
+                      child: const Text("Running"),
+                    ),
+                    FilledButton(
+                      onPressed: () => startTracking("WALKING"),
+                      child: const Text("Walking"),
+                    ),
+                    FilledButton(
+                      onPressed: () => startTracking("CYCLING"),
+                      child: const Text("Cycling"),
+                    )
+                  ],
+                ),
                 Expanded(child: _buildList(context, activities)),
                 Row(children: [
                   Column(children: [

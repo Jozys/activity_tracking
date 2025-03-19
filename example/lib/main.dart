@@ -8,6 +8,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:activity_tracking/activity_tracking.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,7 +34,25 @@ class _MyAppState extends State<MyApp> {
     super.initState();
   }
 
+  Future<bool> checkPermission() async {
+    Map<Permission, PermissionStatus> perms = await [
+      Permission.location,
+      Permission.activityRecognition,
+      Permission.locationWhenInUse,
+      Permission.notification,
+    ].request();
+    var success = true;
+    for (var val in perms.entries) {
+      if (val.value.isDenied) {
+        print("Permission denied for ${val.key}");
+        success = false;
+      }
+    }
+    return success;
+  }
+
   Future<void> startTracking(String type) async {
+    if (!(await checkPermission())) return;
     String activityType;
     try {
       activityType =
@@ -101,6 +120,15 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  double calculateAverageSpeed(Map<DateTime, Location> locations) {
+    double sum = 0.0;
+    locations.forEach((datetime, location) {
+      sum += location.speed;
+    });
+
+    return ((sum / locations.length) * 100).roundToDouble() / 100;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -109,7 +137,9 @@ class _MyAppState extends State<MyApp> {
             title: const Text('Plugin example app'),
             actions: [
               FilledButton(
-                  onPressed: stopTracking, child: const Text("StopTracking")),
+                  onPressed:
+                      activity?.activityType != "UNKNOWN" ? stopTracking : null,
+                  child: const Text("StopTracking")),
             ],
           ),
           body: Container(
@@ -119,32 +149,39 @@ class _MyAppState extends State<MyApp> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     FilledButton(
-                      onPressed: () => startTracking("RUNNING"),
+                      onPressed: activity?.activityType == "UNKNOWN"
+                          ? () => startTracking("RUNNING")
+                          : null,
                       child: const Text("Running"),
                     ),
                     FilledButton(
-                      onPressed: () => startTracking("WALKING"),
+                      onPressed: activity?.activityType == "UNKNOWN"
+                          ? () => startTracking("WALKING")
+                          : null,
                       child: const Text("Walking"),
                     ),
                     FilledButton(
-                      onPressed: () => startTracking("CYCLING"),
+                      onPressed: activity?.activityType == "UNKNOWN"
+                          ? () => startTracking("CYCLING")
+                          : null,
                       child: const Text("Cycling"),
                     )
                   ],
                 ),
-                Expanded(child: _buildList(context, activities)),
-                Row(children: [
+                const Divider(),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Column(children: [
                     Text('Is Tracking running: ${activityRunning}'),
                     Text('Activity: ${activity?.activityType}'),
                     Text('Steps: ${activity?.steps}'),
                     Text('Locations: ${activity?.locations?.length}'),
                     Text('Distance: ${activity?.distance?.toString()}'),
-                    /*  if (activity != null && activity?.locations != null)
-                      Text(
-                          'Speed: ${activity?.locations?.values.last.speed} km/h') */
+                    Text(
+                        'Average Speed: ${calculateAverageSpeed(activity?.locations ?? {})}'),
                   ]),
                 ]),
+                const Divider(),
+                Expanded(child: _buildList(context, activities)),
               ],
             ),
           )),
@@ -166,19 +203,10 @@ class _MyAppState extends State<MyApp> {
                     child: _buildListItem(context, activity),
                   );
                 })
-            : const Text("Hallo Welt"));
+            : const Text("No activities record"));
   }
 
   Widget _buildListItem(BuildContext context, Activity activity) {
-    double calculateAverageSpeed(Map<DateTime, Location> locations) {
-      double sum = 0.0;
-      locations.forEach((datetime, location) {
-        sum += location.speed;
-      });
-
-      return ((sum / locations.length) * 100).roundToDouble() / 100;
-    }
-
     return ListTile(
       minTileHeight: 120,
       title: Text("Activity type: ${activity.activityType ?? "UNKNOWN"}"),

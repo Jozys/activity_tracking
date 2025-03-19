@@ -128,8 +128,8 @@ class ActivityManager {
                 currentActivity?.distance =
                     (currentActivity?.distance?.plus(lastLocation.distanceTo(location))!!);
                 currentActivity?.distance =
-                    (currentActivity?.distance?.times(10000.0))?.roundToInt()
-                        ?.div(10000.0)!!
+                    (currentActivity?.distance?.times(100.0))?.roundToInt()
+                        ?.div(100.0)!!
             }
             currentActivity?.addLocation(
                 location.time,
@@ -137,7 +137,9 @@ class ActivityManager {
                     location.latitude,
                     location.longitude,
                     location.altitude,
-                    location.speed
+                    de.buseslaar.tracking.activity_tracking.model.Location.toKiloMetersPerHour(
+                        location.speed
+                    )
                 )
             )
             this.foregroundService?.updateNotification(
@@ -167,10 +169,7 @@ class ActivityManager {
         }
         if (currentActivity?.locations?.isEmpty() == true) return ""
         notification = notification +
-                "Speed: " + ((currentActivity?.locations?.values?.last()?.speed?.times(
-            3.6F
-        )?.times(10.0))?.roundToInt()
-            ?.div(10.0)).toString() + " km/h;"
+                "Speed: " + ((currentActivity?.locations?.entries?.maxByOrNull { it.key }?.value?.speed?.toString()) + " km/h;")
 
         if (currentActivity?.distance == null) return notification;
         notification =
@@ -194,7 +193,9 @@ class ActivityManager {
                 locationData.put("latitude", rawLocationData.latitude);
                 locationData.put("longitude", rawLocationData.longitude);
                 locationData.put("altitude", rawLocationData.altitude);
-                locationData.put("speed", rawLocationData.speed.toDouble());
+                locationData.put(
+                    "speed", rawLocationData.speed
+                );
                 val locationTime = JSONObject();
                 locationTime.put(rawLocationData.time.toString(), locationData);
                 json.put("data", locationTime);

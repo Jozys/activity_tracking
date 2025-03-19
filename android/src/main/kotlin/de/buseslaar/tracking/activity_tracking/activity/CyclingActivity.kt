@@ -17,7 +17,6 @@ class CyclingActivity() : Activity(activityType = ActivityType.CYCLING) {
         this.onLocationChanged = onLocationChanged
     }
 
-
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun startSensors(context: Context) {
         locationSensor = LocationSensor(context, onLocationUpdatedListener = {

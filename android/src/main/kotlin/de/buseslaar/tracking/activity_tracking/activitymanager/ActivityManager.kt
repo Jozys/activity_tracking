@@ -106,10 +106,19 @@ class ActivityManager {
     }
 
     fun onLocationChanged(locations: List<Location>) {
+        Log.d(TAG, "Location Changed with ${currentActivity?.locations?.size} locations")
+        Log.d(TAG, "Distance ${currentActivity?.distance}")
         for (location in locations) {
             Log.d(TAG, location.longitude.toString())
             if (currentActivity != null && currentActivity!!.locations.isNotEmpty()) {
-                val lastLocation = currentActivity?.locations?.values?.last();
+                val lastLocation =
+                    currentActivity?.locations?.entries?.maxByOrNull { it.key }?.value;
+                Log.d(
+                    TAG,
+                    "Last Location: ${lastLocation?.latitude}, ${lastLocation?.longitude}, ${
+                        lastLocation?.distanceTo(location)
+                    }"
+                )
                 if (lastLocation == null) {
                     continue;
                 }
@@ -117,7 +126,10 @@ class ActivityManager {
                     continue;
                 }
                 currentActivity?.distance =
-                    (currentActivity?.distance?.plus(lastLocation.distanceTo(location))!! * 1000.0).roundToInt() / 1000.0;
+                    (currentActivity?.distance?.plus(lastLocation.distanceTo(location))!!);
+                currentActivity?.distance =
+                    (currentActivity?.distance?.times(10000.0))?.roundToInt()
+                        ?.div(10000.0)!!
             }
             currentActivity?.addLocation(
                 location.time,

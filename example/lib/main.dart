@@ -122,11 +122,14 @@ class _MyAppState extends State<MyApp> {
 
   double calculateAverageSpeed(Map<DateTime, Location> locations) {
     double sum = 0.0;
+
+    if (locations.length == 0) return 0;
+
     locations.forEach((datetime, location) {
       sum += location.speed;
     });
 
-    return ((sum / locations.length) * 100).roundToDouble() / 100;
+    return ((sum / locations.length) * 10.0).round() / 10.0;
   }
 
   @override
@@ -175,6 +178,10 @@ class _MyAppState extends State<MyApp> {
                     Text('Activity: ${activity?.activityType}'),
                     Text('Steps: ${activity?.steps}'),
                     Text('Locations: ${activity?.locations?.length}'),
+                    if (activity?.locations != null &&
+                        activity!.locations!.isNotEmpty)
+                      Text(
+                          'Current speed: ${activity?.locations?.entries?.last?.value?.speed}'),
                     Text('Distance: ${activity?.distance?.toString()}'),
                     Text(
                         'Average Speed: ${calculateAverageSpeed(activity?.locations ?? {})}'),

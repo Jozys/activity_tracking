@@ -75,8 +75,14 @@ open class ForegroundService() : Service() {
         sensorStart()
         val serviceIntent = Intent(context, this::class.java)
         ContextCompat.startForegroundService(context, serviceIntent)
-
     }
 
+    fun createNotificationChannel(context: Context) {
+        try {
+            NotificationsHelper.createNotificationChannel(context);
+        } catch (e: Exception) {
+            e.printStackTrace();
+        }
+    }
 
 }

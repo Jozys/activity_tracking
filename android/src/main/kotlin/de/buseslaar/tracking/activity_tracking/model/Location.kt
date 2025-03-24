@@ -1,6 +1,7 @@
 package de.buseslaar.tracking.activity_tracking.model
 
 import android.location.Location
+import kotlin.math.roundToInt
 
 class Location {
 
@@ -26,12 +27,23 @@ class Location {
             }"""
     }
 
+    companion object {
+        fun toKiloMetersPerHour(speed: Float): Float {
+            return speed.times(3.6F).times(10.0).roundToInt().div(10.0).toFloat()
+        }
+
+        fun kilometersPerHourToMetersPerSecond(kilometersPerHour: Float): Float {
+            return kilometersPerHour.div(3.6F)
+        }
+
+    }
+
     fun distanceTo(compare: Location): Float {
         var location = Location("");
         location.latitude = this.latitude;
         location.longitude = this.longitude;
         location.altitude = this.altitude;
-        location.speed = this.speed;
+        location.speed = kilometersPerHourToMetersPerSecond(speed);
         // Distance in meters
         var distance = location.distanceTo(compare) / 1000;
         return distance;

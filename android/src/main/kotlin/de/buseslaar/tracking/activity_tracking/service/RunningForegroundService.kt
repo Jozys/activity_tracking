@@ -4,21 +4,19 @@ import android.content.Context
 import android.util.Log
 import de.buseslaar.tracking.activity_tracking.model.ActivityType
 
-open class WalkingForegroundService() : ForegroundService() {
+class RunningForegroundService : WalkingForegroundService {
 
-    override var notificationTitle: String = ActivityType.WALKING.type
+    override var notificationTitle: String = ActivityType.RUNNING.type
     override var notificationText: String = "Steps: 0"
-    private var TAG = "WALKING_FOREGROUND_SERVICE"
-    internal var context: Context? = null;
+    private var TAG = "RUNNING_FOREGROUND_SERVICE"
 
-    constructor(context: Context) : this() {
+    constructor(context: Context) : super(context) {
         this.context = context;
         this.createNotificationChannel(context)
-
     }
 
     override fun startService(context: Context, sensorStart: () -> Unit) {
-        Log.d(TAG, "Starting Walking Foreground Service")
+        Log.d(TAG, "Starting Running Foreground Service")
         super.startService(context, sensorStart)
     }
 }

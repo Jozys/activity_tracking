@@ -1,10 +1,11 @@
 import 'dart:ffi';
 
 import 'package:activity_tracking/model/Location.dart';
+import 'package:activity_tracking/model/activity_type.dart';
 
 class Activity {
   // TODO: Ändere den Typ in Health Connect-Typen
-  String? activityType;
+  ActivityType? activityType;
   int? steps = 0;
   Map<DateTime, Location>? locations = {};
   int? startDateTime = 0;

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:activity_tracking/model/activity.dart';
+import 'package:activity_tracking/model/activity_type.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -21,7 +22,7 @@ class MethodChannelActivityTracking extends ActivityTrackingPlatform {
   }
 
   @override
-  Future<String?> startActivity(String type) async {
+  Future<String?> startActivity(ActivityType type) async {
     final started = await methodChannel
         .invokeMethod<String>('startActivity', <String, dynamic>{'type': type});
     return started;
@@ -37,9 +38,7 @@ class MethodChannelActivityTracking extends ActivityTrackingPlatform {
         return activity;
       }
     } catch (e) {
-      return Activity(
-        activityType: "UNKNOWN",
-      );
+      return Activity(activityType: ActivityType.unknown);
     }
   }
 

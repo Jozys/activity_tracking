@@ -1,4 +1,5 @@
 import 'package:activity_tracking/model/activity.dart';
+import 'package:activity_tracking/model/activity_type.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:activity_tracking/activity_tracking.dart';
 import 'package:activity_tracking/activity_tracking_platform_interface.dart';
@@ -12,20 +13,17 @@ class MockActivityTrackingPlatform
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Future<String?> startActivity(String type) {
-    // TODO: implement startActivity
+  Future<String?> startActivity(ActivityType type) {
     throw UnimplementedError();
   }
 
   @override
   Future<Activity> stopCurrentActivity() {
-    // TODO: implement stopCurrentActivity
     throw UnimplementedError();
   }
 
   @override
   Stream getNativeEvents() {
-    // TODO: implement getNativeEvents
     throw UnimplementedError();
   }
 }

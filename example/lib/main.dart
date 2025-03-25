@@ -151,8 +151,9 @@ class _MyAppState extends State<MyApp> {
             title: const Text('Plugin example app'),
             actions: [
               FilledButton(
-                  onPressed:
-                      activity?.activityType != "UNKNOWN" ? stopTracking : null,
+                  onPressed: activity?.activityType != ActivityType.unknown
+                      ? stopTracking
+                      : null,
                   child: const Text("StopTracking")),
             ],
           ),
@@ -163,19 +164,19 @@ class _MyAppState extends State<MyApp> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     FilledButton(
-                      onPressed: activity?.activityType == "UNKNOWN"
+                      onPressed: activity?.activityType == ActivityType.unknown
                           ? () => startTracking(ActivityType.running)
                           : null,
                       child: const Text("Running"),
                     ),
                     FilledButton(
-                      onPressed: activity?.activityType == "UNKNOWN"
+                      onPressed: activity?.activityType == ActivityType.unknown
                           ? () => startTracking(ActivityType.walking)
                           : null,
                       child: const Text("Walking"),
                     ),
                     FilledButton(
-                      onPressed: activity?.activityType == "UNKNOWN"
+                      onPressed: activity?.activityType == ActivityType.unknown
                           ? () => startTracking(ActivityType.cycling)
                           : null,
                       child: const Text("Cycling"),

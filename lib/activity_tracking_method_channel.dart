@@ -23,8 +23,8 @@ class MethodChannelActivityTracking extends ActivityTrackingPlatform {
 
   @override
   Future<String?> startActivity(ActivityType type) async {
-    final started = await methodChannel
-        .invokeMethod<String>('startActivity', <String, dynamic>{'type': type});
+    final started = await methodChannel.invokeMethod<String>(
+        'startActivity', <String, dynamic>{'type': type.name});
     return started;
   }
 
@@ -40,8 +40,10 @@ class MethodChannelActivityTracking extends ActivityTrackingPlatform {
     } catch (e) {
       return Activity(activityType: ActivityType.unknown);
     }
+    return null;
   }
 
+  @override
   Stream<dynamic> getNativeEvents() {
     return _eventChannel.receiveBroadcastStream();
   }

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:activity_tracking/model/Location.dart';
 import 'package:activity_tracking/model/activity.dart';
+import 'package:activity_tracking/model/activity_type.dart';
 import 'package:activity_tracking/model/message.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -23,8 +24,11 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String activityRunning = "Unknown";
-  Activity? activity =
-      Activity(activityType: "UNKNOWN", steps: 0, locations: {}, distance: 0.0);
+  Activity? activity = Activity(
+      activityType: ActivityType.unknown,
+      steps: 0,
+      locations: {},
+      distance: 0.0);
   final _activityTrackingPlugin = ActivityTracking();
   List<Activity> activities = <Activity>[];
   StreamSubscription? listener;
@@ -51,7 +55,7 @@ class _MyAppState extends State<MyApp> {
     return success;
   }
 
-  Future<void> startTracking(String type) async {
+  Future<void> startTracking(ActivityType type) async {
     if (!(await checkPermission())) return;
     String activityType;
     try {
@@ -65,7 +69,8 @@ class _MyAppState extends State<MyApp> {
     } on Exception {
       activityType = "UNKNOWN";
     }
-    activity?.activityType = activityType;
+    activity?.activityType =
+        ActivityType.values.firstWhere((e) => e.name == activityType);
 
     setState(() {
       activityRunning = activityType != "UNKNOWN" ? "Yes" : "No";
@@ -107,14 +112,20 @@ class _MyAppState extends State<MyApp> {
     } on Exception {
       activityState = "Failed to stop";
       newActivity = Activity(
-          activityType: "UNKNOWN", steps: -1, locations: {}, distance: 0.0);
+          activityType: ActivityType.unknown,
+          steps: -1,
+          locations: {},
+          distance: 0.0);
     }
     listener?.cancel();
 
     setState(() {
       activityRunning = activityState!;
       activity = Activity(
-          activityType: "UNKNOWN", steps: 0, locations: {}, distance: 0.0);
+          activityType: ActivityType.unknown,
+          steps: 0,
+          locations: {},
+          distance: 0.0);
       listener = null;
       activities = newActivities;
     });
@@ -153,19 +164,19 @@ class _MyAppState extends State<MyApp> {
                   children: [
                     FilledButton(
                       onPressed: activity?.activityType == "UNKNOWN"
-                          ? () => startTracking("RUNNING")
+                          ? () => startTracking(ActivityType.running)
                           : null,
                       child: const Text("Running"),
                     ),
                     FilledButton(
                       onPressed: activity?.activityType == "UNKNOWN"
-                          ? () => startTracking("WALKING")
+                          ? () => startTracking(ActivityType.walking)
                           : null,
                       child: const Text("Walking"),
                     ),
                     FilledButton(
                       onPressed: activity?.activityType == "UNKNOWN"
-                          ? () => startTracking("CYCLING")
+                          ? () => startTracking(ActivityType.cycling)
                           : null,
                       child: const Text("Cycling"),
                     )
@@ -174,7 +185,7 @@ class _MyAppState extends State<MyApp> {
                 const Divider(),
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Column(children: [
-                    Text('Is Tracking running: ${activityRunning}'),
+                    Text('Is Tracking running: $activityRunning'),
                     Text('Activity: ${activity?.activityType}'),
                     Text('Steps: ${activity?.steps}'),
                     Text('Locations: ${activity?.locations?.length}'),

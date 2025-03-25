@@ -1,4 +1,5 @@
 import 'package:activity_tracking/model/activity.dart';
+import 'package:activity_tracking/model/activity_type.dart';
 
 import 'activity_tracking_platform_interface.dart';
 
@@ -7,7 +8,7 @@ class ActivityTracking {
     return ActivityTrackingPlatform.instance.getPlatformVersion();
   }
 
-  Future<String?> startActivity(String type) {
+  Future<String?> startActivity(ActivityType type) {
     return ActivityTrackingPlatform.instance.startActivity(type);
   }
 

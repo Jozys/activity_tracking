@@ -1,4 +1,5 @@
 import 'package:activity_tracking/model/activity.dart';
+import 'package:activity_tracking/model/activity_type.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'activity_tracking_method_channel.dart';
@@ -28,7 +29,7 @@ abstract class ActivityTrackingPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Future<String?> startActivity(String type) {
+  Future<String?> startActivity(ActivityType type) {
     throw UnimplementedError("startActivity() has not been implemented");
   }
 

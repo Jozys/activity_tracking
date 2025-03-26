@@ -8,13 +8,13 @@ import android.content.Context.NOTIFICATION_SERVICE
 import android.location.Location
 import android.util.Log
 import androidx.annotation.RequiresPermission
-import de.buseslaar.tracking.activity_tracking.activity.CyclingActivity
+import de.buseslaar.tracking.activity_tracking.activity.BikingActivity
 import de.buseslaar.tracking.activity_tracking.activity.RunningActivity
 import de.buseslaar.tracking.activity_tracking.activity.WalkingActivity
 import de.buseslaar.tracking.activity_tracking.model.Activity
 import de.buseslaar.tracking.activity_tracking.model.ActivityType
 import de.buseslaar.tracking.activity_tracking.notification.NotificationsHelper
-import de.buseslaar.tracking.activity_tracking.service.CyclingForegroundService
+import de.buseslaar.tracking.activity_tracking.service.BikingForegroundService
 import de.buseslaar.tracking.activity_tracking.service.ForegroundService
 import de.buseslaar.tracking.activity_tracking.service.RunningForegroundService
 import de.buseslaar.tracking.activity_tracking.service.WalkingForegroundService
@@ -47,10 +47,10 @@ class ActivityManager {
                         onStepChanged = { onStepChanged(it) })
                 }
 
-                ActivityType.CYCLING -> {
-                    this.foregroundService = CyclingForegroundService(context!!)
+                ActivityType.BIKING -> {
+                    this.foregroundService = BikingForegroundService(context!!)
                     this.currentActivity =
-                        CyclingActivity(onLocationChanged = { onLocationChanged(it) })
+                        BikingActivity(onLocationChanged = { onLocationChanged(it) })
                 }
 
                 ActivityType.RUNNING -> {

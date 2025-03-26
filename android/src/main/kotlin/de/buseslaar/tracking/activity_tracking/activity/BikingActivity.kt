@@ -8,7 +8,7 @@ import de.buseslaar.tracking.activity_tracking.model.Activity
 import de.buseslaar.tracking.activity_tracking.model.ActivityType
 import de.buseslaar.tracking.activity_tracking.sensor.LocationSensor
 
-class CyclingActivity() : Activity(activityType = ActivityType.CYCLING) {
+class BikingActivity() : Activity(activityType = ActivityType.BIKING) {
 
     private var locationSensor: LocationSensor? = null
     private var onLocationChanged: (List<Location>) -> Unit = {}

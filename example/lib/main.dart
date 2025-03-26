@@ -179,9 +179,9 @@ class _MyAppState extends State<MyApp> {
                     ),
                     FilledButton(
                       onPressed: activity?.activityType == ActivityType.unknown
-                          ? () => startTracking(ActivityType.cycling)
+                          ? () => startTracking(ActivityType.biking)
                           : null,
-                      child: const Text("Cycling"),
+                      child: const Text("Biking"),
                     )
                   ],
                 ),

@@ -58,9 +58,12 @@ class _MyAppState extends State<MyApp> {
   Future<void> startTracking(ActivityType type) async {
     if (!(await checkPermission())) return;
     String activityType;
+    Activity? startedActivity;
     try {
-      activityType =
-          await _activityTrackingPlugin.startActivity(type) ?? "UNKNOWN";
+      startedActivity = await _activityTrackingPlugin.startActivity(type);
+      print(startedActivity);
+      activityType = activity?.activityType?.name ?? "UNKNOWN";
+
       setState(() {
         listener = _activityTrackingPlugin
             .getNativeEvents()
@@ -71,10 +74,9 @@ class _MyAppState extends State<MyApp> {
     }
     activity?.activityType =
         ActivityType.values.firstWhere((e) => e.name == activityType);
-
     setState(() {
       activityRunning = activityType != "UNKNOWN" ? "Yes" : "No";
-      activity = activity;
+      activity = startedActivity;
     });
   }
 

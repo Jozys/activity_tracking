@@ -29,7 +29,7 @@ abstract class ActivityTrackingPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Future<String?> startActivity(ActivityType type) {
+  Future<Activity?> startActivity(ActivityType type) {
     throw UnimplementedError("startActivity() has not been implemented");
   }
 

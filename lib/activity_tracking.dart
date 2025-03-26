@@ -8,7 +8,7 @@ class ActivityTracking {
     return ActivityTrackingPlatform.instance.getPlatformVersion();
   }
 
-  Future<String?> startActivity(ActivityType type) {
+  Future<Activity?> startActivity(ActivityType type) {
     return ActivityTrackingPlatform.instance.startActivity(type);
   }
 

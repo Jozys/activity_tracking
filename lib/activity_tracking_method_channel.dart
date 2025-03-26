@@ -22,10 +22,11 @@ class MethodChannelActivityTracking extends ActivityTrackingPlatform {
   }
 
   @override
-  Future<String?> startActivity(ActivityType type) async {
+  Future<Activity?> startActivity(ActivityType type) async {
     final started = await methodChannel.invokeMethod<String>(
         'startActivity', <String, dynamic>{'type': type.name});
-    return started;
+
+    return Activity.fromJson(jsonDecode(started!));
   }
 
   @override

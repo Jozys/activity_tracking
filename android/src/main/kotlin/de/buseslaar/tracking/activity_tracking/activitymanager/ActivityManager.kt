@@ -69,7 +69,7 @@ class ActivityManager {
                 this.currentActivity?.startSensors(context!!)
             });
         }
-        return type;
+        return currentActivity?.parseToJSON().toString()
     }
 
     fun stopCurrentActivity(): Activity? {

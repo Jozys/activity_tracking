@@ -13,7 +13,7 @@ class MockActivityTrackingPlatform
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Future<String?> startActivity(ActivityType type) {
+  Future<Activity?> startActivity(ActivityType type) {
     throw UnimplementedError();
   }
 

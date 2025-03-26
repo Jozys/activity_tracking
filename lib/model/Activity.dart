@@ -21,7 +21,7 @@ class Activity {
       this.distance});
 
   factory Activity.fromJson(Map<String, dynamic> json) {
-    var rawLocations = json["locations"] as Map<String, dynamic>;
+    var rawLocations = json["locations"] as Map<String, dynamic> ?? {};
     var locations = <DateTime, Location>{};
     rawLocations.forEach((key, value) {
       locations[DateTime.fromMillisecondsSinceEpoch(int.parse(key))] = Location(
@@ -31,12 +31,12 @@ class Activity {
           speed: value["speed"]);
     });
     return Activity(
-        startDateTime: json["startDateTime"],
-        endDateTime: json["endDateTime"],
+        startDateTime: json["startDateTime"] ?? 0,
+        endDateTime: json["endDateTime"] ?? 0,
         activityType:
             ActivityType.values.firstWhere((e) => e.name == json["type"]),
-        distance: json["distance"],
-        locations: locations,
-        steps: json["steps"]);
+        distance: json["distance"] ?? 0.0,
+        locations: locations ?? {},
+        steps: json["steps"] ?? 0);
   }
 }

@@ -33,7 +33,8 @@ class Activity {
     return Activity(
         startDateTime: json["startDateTime"],
         endDateTime: json["endDateTime"],
-        activityType: json["type"],
+        activityType:
+            ActivityType.values.firstWhere((e) => e.name == json["type"]),
         distance: json["distance"],
         locations: locations,
         steps: json["steps"]);

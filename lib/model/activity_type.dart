@@ -1,7 +1,7 @@
 enum ActivityType {
   walking(name: "WALKING"),
   running(name: "RUNNING"),
-  cycling(name: "CYCLING"),
+  biking(name: "BIKING"),
   unknown(name: "UNKNOWN");
 
   const ActivityType({required this.name});

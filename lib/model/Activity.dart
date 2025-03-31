@@ -28,7 +28,8 @@ class Activity {
           latitude: value["latitude"],
           longitude: value["longitude"],
           altitude: value["altitude"],
-          speed: value["speed"]);
+          speed: value["speed"],
+          pace: value["pace"]);
     });
     return Activity(
         startDateTime: json["startDateTime"] ?? 0,

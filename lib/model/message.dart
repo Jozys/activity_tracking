@@ -22,6 +22,7 @@ class Message<T> {
             longitude: value["longitude"],
             altitude: value["altitude"],
             speed: value["speed"],
+            pace: value["pace"],
           );
         });
         return Message(type: type, data: locations as T);

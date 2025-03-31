@@ -25,8 +25,10 @@ class Location {
                 "latitude": $latitude,
                 "longitude": $longitude,
                 "altitude": $altitude,
-                "speed": ${speed.toDouble()}
-            }"""
+                "speed": ${speed.toDouble()},
+                "pace": ${
+            pace.toDouble()
+        }}"""
     }
 
     companion object {

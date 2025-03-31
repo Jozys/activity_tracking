@@ -194,7 +194,10 @@ class ActivityManager {
                 locationData.put("longitude", rawLocationData.longitude);
                 locationData.put("altitude", rawLocationData.altitude);
                 locationData.put(
-                    "speed", rawLocationData.speed
+                    "speed",
+                    de.buseslaar.tracking.activity_tracking.model.Location.toKiloMetersPerHour(
+                        rawLocationData.speed
+                    )
                 );
                 val locationTime = JSONObject();
                 locationTime.put(rawLocationData.time.toString(), locationData);

@@ -9,12 +9,14 @@ class Location {
     var longitude: Double = 0.0
     var altitude: Double = 0.0
     var speed: Float = 0.0F
+    var pace: Float = 0.0F
 
     constructor(latitude: Double, longitude: Double, altitude: Double, speed: Float) {
         this.latitude = latitude
         this.longitude = longitude
         this.altitude = altitude
-        this.speed = speed
+        this.speed = toKiloMetersPerHour(speed)
+        this.pace = speedToPace(speed)
     }
 
     fun parseToJSON(): String {
@@ -36,6 +38,19 @@ class Location {
             return kilometersPerHour.div(3.6F)
         }
 
+    }
+
+    private fun speedToPace(speed: Float): Float {
+        var pace = 0.0F;
+        if (speed <= 0.0F) {
+            pace = 0.0F
+            return pace
+        }
+        // Convert speed from m/s to km/h first
+        val speedKmh = toKiloMetersPerHour(speed)
+        // Calculate pace as seconds per kilometer (60 * 60 / speedKmh)
+        pace = 3600.0F / speedKmh
+        return pace;
     }
 
     fun distanceTo(compare: Location): Float {

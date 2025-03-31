@@ -145,6 +145,13 @@ class _MyAppState extends State<MyApp> {
     return ((sum / locations.length) * 10.0).round() / 10.0;
   }
 
+  String getPace(double pace) {
+    if (pace == 0) return "0:00 min/km";
+    var minutes = pace ~/ 60;
+    var seconds = (pace % 60).toInt();
+    return "${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')} min/km";
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -194,8 +201,14 @@ class _MyAppState extends State<MyApp> {
                     Text('Locations: ${activity?.locations?.length}'),
                     if (activity?.locations != null &&
                         activity!.locations!.isNotEmpty)
-                      Text(
-                          'Current speed: ${activity?.locations?.entries?.last?.value?.speed}'),
+                      Column(
+                        children: [
+                          Text(
+                              'Current speed: ${activity?.locations?.entries?.last?.value?.speed}'),
+                          Text(
+                              'Current pace: ${getPace(activity?.locations?.entries?.last?.value?.pace ?? 0)}'),
+                        ],
+                      ),
                     Text('Distance: ${activity?.distance?.toString()}'),
                     Text(
                         'Average Speed: ${calculateAverageSpeed(activity?.locations ?? {})}'),

@@ -10,6 +10,10 @@ class RunningForegroundService : WalkingForegroundService {
     override var notificationText: String = "Steps: 0"
     private var TAG = "RUNNING_FOREGROUND_SERVICE"
 
+    constructor() : super() {
+        // Default constructor
+    }
+
     constructor(context: Context) : super(context) {
         this.context = context;
         this.createNotificationChannel(context)

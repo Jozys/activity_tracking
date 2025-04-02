@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:activity_tracking/model/Location.dart';
+import 'package:activity_tracking/model/location.dart';
 import 'package:activity_tracking/model/activity.dart';
 import 'package:activity_tracking/model/activity_type.dart';
 import 'package:activity_tracking/model/message.dart';

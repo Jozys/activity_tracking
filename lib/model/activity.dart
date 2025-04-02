@@ -1,6 +1,6 @@
 import 'dart:ffi';
 
-import 'package:activity_tracking/model/Location.dart';
+import 'package:activity_tracking/model/location.dart';
 import 'package:activity_tracking/model/activity_type.dart';
 
 class Activity {

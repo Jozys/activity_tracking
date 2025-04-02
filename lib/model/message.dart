@@ -1,4 +1,4 @@
-import 'package:activity_tracking/model/Location.dart';
+import 'package:activity_tracking/model/location.dart';
 
 class Message<T> {
   String? type;

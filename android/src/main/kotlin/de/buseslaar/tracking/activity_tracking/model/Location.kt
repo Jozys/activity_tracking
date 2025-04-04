@@ -43,14 +43,14 @@ class Location {
     }
 
     private fun speedToPace(speed: Float): Float {
-        var pace = 0.0F;
-        if (speed <= 0.0) {
+        var pace = 0.0F
+        if (speed <= 0.0F) {
             pace = 0.0F
             return pace
         }
         // Convert speed from m/s to km/h first
         val speedKmh = toKiloMetersPerHour(speed)
-        if (speedKmh <= 0.0) {
+        if (speedKmh <= 0.0F) {
             pace = 0.0F
             return pace
         }

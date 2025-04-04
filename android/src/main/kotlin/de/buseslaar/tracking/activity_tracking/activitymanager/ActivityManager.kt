@@ -137,9 +137,7 @@ class ActivityManager {
                     location.latitude,
                     location.longitude,
                     location.altitude,
-                    de.buseslaar.tracking.activity_tracking.model.Location.toKiloMetersPerHour(
-                        location.speed
-                    )
+                    location.speed
                 )
             )
             this.foregroundService?.updateNotification(
@@ -208,7 +206,8 @@ class ActivityManager {
                     "speed",
                     rawLocationData.value.speed.times(10.0).roundToInt().div(10.0).toDouble()
                 );
-                locationData.put("pace", rawLocationData.value.pace);
+                
+                locationData.put("pace", rawLocationData.value.pace.toDouble());
                 val locationTime = JSONObject();
                 locationTime.put(rawLocationData.key.toString(), locationData);
                 json.put("data", locationTime);

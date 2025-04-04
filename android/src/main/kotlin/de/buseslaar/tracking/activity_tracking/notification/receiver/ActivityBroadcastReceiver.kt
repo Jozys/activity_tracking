@@ -31,16 +31,14 @@ class ActivityBroadcastReceiver() : BroadcastReceiver() {
             return;
         }
         when (intent?.action) {
-
             "$packageName.PAUSE" -> {
                 if (activityManagerInstance != null && context.applicationContext != null) {
                     if (activityManagerInstance!!.isPaused) {
-                        activityManagerInstance!!.isPaused = false
                         activityManagerInstance!!.currentActivity?.startSensors(context.applicationContext)
                     } else {
-                        activityManagerInstance!!.isPaused = true
                         activityManagerInstance!!.currentActivity?.stopSensors(context.applicationContext)
                     }
+                    activityManagerInstance!!.isPaused = !activityManagerInstance!!.isPaused
                     activityManagerInstance!!.foregroundService?.updateNotification(
                         context,
                         activityManagerInstance!!.currentActivity?.type.toString(),
@@ -62,7 +60,6 @@ class ActivityBroadcastReceiver() : BroadcastReceiver() {
 
             "$packageName.STOP" -> {
                 if (activityManagerInstance != null && context.applicationContext != null) {
-
                     activityManagerInstance!!.stopCurrentActivity()
                     val notificationManager =
                         context.applicationContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -74,7 +71,6 @@ class ActivityBroadcastReceiver() : BroadcastReceiver() {
                         )
                     )
                 }
-
             }
         }
     }

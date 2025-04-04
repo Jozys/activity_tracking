@@ -48,7 +48,9 @@ object NotificationsHelper {
             .setContentTitle(title)
             .setContentText(description)
             .setSmallIcon(android.R.drawable.ic_media_play)
-            .setOnlyAlertOnce(true)
+            .setOngoing(true)
+            .setSilent(true)
+
         var launchIntent = getLaunchIntent(context)
         if (launchIntent != null) {
             notification.setContentIntent(launchIntent)

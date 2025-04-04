@@ -24,6 +24,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
@@ -36,7 +37,16 @@
             android:name="de.buseslaar.tracking.activity_tracking.service.WalkingForegroundService"
             android:exported="false"
             android:foregroundServiceType="location|health" />
+        <receiver
+            android:name="de.buseslaar.tracking.activity_tracking.notification.receiver.ActivityBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="de.buseslaar.tracking.PAUSE" />
+                <action android:name="de.buseslaar.tracking.STOP" />
+            </intent-filter>
+        </receiver>
     </application>
+
 
     <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
     <uses-permission android:name="android.permission.health.WRITE_HEART_RATE" />

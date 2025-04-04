@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import androidx.annotation.RequiresPermission
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import de.buseslaar.tracking.activity_tracking.model.ActivityType
 import de.buseslaar.tracking.activity_tracking.notification.NotificationsHelper
@@ -32,15 +33,20 @@ open class ForegroundService() : Service() {
 
         if (intent?.action == "ACTION_STOP_SERVICE") {
             stopSelf()
-
         }
+
         return START_STICKY;
     }
 
 
-    open fun updateNotification(context: Context, title: String, text: String) {
+    open fun updateNotification(
+        context: Context,
+        title: String,
+        text: String,
+        actions: List<NotificationCompat.Action> = emptyList()
+    ) {
         notification =
-            NotificationsHelper.buildNotification(context, title, text);
+            NotificationsHelper.buildNotification(context, title, text, actions);
         var mNotificationManager =
             context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager;
         mNotificationManager.notify(1, notification);

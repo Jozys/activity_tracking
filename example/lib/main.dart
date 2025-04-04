@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:activity_tracking/model/event.dart';
 import 'package:activity_tracking/model/location.dart';
 import 'package:activity_tracking/model/activity.dart';
 import 'package:activity_tracking/model/activity_type.dart';
@@ -31,6 +32,7 @@ class _MyAppState extends State<MyApp> {
       distance: 0.0);
   final _activityTrackingPlugin = ActivityTracking();
   List<Activity> activities = <Activity>[];
+  bool isRecording = false;
   StreamSubscription? listener;
 
   @override
@@ -59,9 +61,9 @@ class _MyAppState extends State<MyApp> {
     if (!(await checkPermission())) return;
     String activityType;
     Activity? startedActivity;
+
     try {
       startedActivity = await _activityTrackingPlugin.startActivity(type);
-      print(startedActivity);
       activityType = activity?.activityType?.name ?? "UNKNOWN";
 
       setState(() {
@@ -77,26 +79,49 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       activityRunning = activityType != "UNKNOWN" ? "Yes" : "No";
       activity = startedActivity;
+      isRecording = true;
     });
   }
 
   void eventMessageListener(dynamic e) {
     var eventMessage = Message.fromJson(jsonDecode(e));
-    switch (eventMessage.type) {
-      case "step":
+    if (eventMessage.type == null) return;
+
+    switch (eventMessage.type!) {
+      case Event.step:
         activity?.steps =
             ((activity?.steps ?? 0) + (eventMessage.data ?? 0)) as int?;
-      case "location":
+      case Event.location:
         if (eventMessage.data != null) {
           activity?.locations?.addAll(eventMessage.data);
         }
-      case "distance":
+      case Event.distance:
         if (eventMessage.data != null && eventMessage.data != 0) {
           activity?.distance = eventMessage.data;
         }
+      case Event.pause:
+        isRecording = !isRecording;
+        activity = eventMessage.data as Activity;
+      case Event.resume:
+        isRecording = !isRecording;
+        activity = eventMessage.data as Activity;
+
+      case Event.stop:
+        isRecording = false;
+        if (eventMessage.data is Activity) {
+          activities.add(eventMessage.data as Activity);
+        }
+        activity = Activity(
+            activityType: ActivityType.unknown,
+            steps: 0,
+            locations: {},
+            distance: 0.0);
     }
     setState(() {
       activity = activity;
+      isRecording = isRecording;
+      activities = activities;
+      activityRunning = activity?.activityType?.name ?? "UNKNOWN";
     });
   }
 
@@ -212,6 +237,7 @@ class _MyAppState extends State<MyApp> {
                     Text('Distance: ${activity?.distance?.toString()}'),
                     Text(
                         'Average Speed: ${calculateAverageSpeed(activity?.locations ?? {})}'),
+                    Text("Is Recording: $isRecording"),
                   ]),
                 ]),
                 const Divider(),

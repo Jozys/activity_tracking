@@ -45,6 +45,11 @@ class MethodChannelActivityTracking extends ActivityTrackingPlatform {
   }
 
   @override
+  Future<bool?> pauseCurrentActivity() async {
+    return await methodChannel.invokeMethod<bool?>('pauseCurrentActivity');
+  }
+
+  @override
   Stream<dynamic> getNativeEvents() {
     return _eventChannel.receiveBroadcastStream();
   }

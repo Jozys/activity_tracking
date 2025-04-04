@@ -26,6 +26,11 @@ class MockActivityTrackingPlatform
   Stream getNativeEvents() {
     throw UnimplementedError();
   }
+
+  @override
+  Future<bool?> pauseCurrentActivity() {
+    throw UnimplementedError();
+  }
 }
 
 void main() {

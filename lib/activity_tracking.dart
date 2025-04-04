@@ -16,6 +16,10 @@ class ActivityTracking {
     return ActivityTrackingPlatform.instance.stopCurrentActivity();
   }
 
+  Future<bool?> pauseCurrentActivity() {
+    return ActivityTrackingPlatform.instance.pauseCurrentActivity();
+  }
+
   Stream<dynamic> getNativeEvents() {
     return ActivityTrackingPlatform.instance.getNativeEvents();
   }

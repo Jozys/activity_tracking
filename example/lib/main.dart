@@ -125,6 +125,23 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Future<void> pauseTracking() async {
+    String? activityState;
+    try {
+      var success = await _activityTrackingPlugin.pauseCurrentActivity();
+      if (success != null && success == true) {
+        activityState = "Paused";
+        isRecording = !isRecording;
+      }
+    } on Exception {
+      activityState = "Failed to pause";
+    }
+    setState(() {
+      activityRunning = activityState!;
+      isRecording = isRecording;
+    });
+  }
+
   Future<void> stopTracking() async {
     Activity? newActivity;
     String? activityState;
@@ -214,7 +231,13 @@ class _MyAppState extends State<MyApp> {
                           ? () => startTracking(ActivityType.biking)
                           : null,
                       child: const Text("Biking"),
-                    )
+                    ),
+                    FilledButton(
+                        onPressed:
+                            activity?.activityType != ActivityType.unknown
+                                ? () => pauseTracking()
+                                : null,
+                        child: Text(isRecording ? "Pause" : "Resume")),
                   ],
                 ),
                 const Divider(),

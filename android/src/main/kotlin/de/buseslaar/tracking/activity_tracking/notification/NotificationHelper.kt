@@ -56,7 +56,6 @@ object NotificationsHelper {
         }
 
         actions.forEach { action ->
-
             notification.addAction(action)
         }
         return notification.build();

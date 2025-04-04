@@ -63,6 +63,11 @@ class ActivityTrackingPlugin : FlutterPlugin, MethodCallHandler {
                 result.success(activityType)
             }
 
+            "pauseCurrentActivity" -> {
+                var activity = activityManager.pauseCurrentActivity()
+                result.success(activity)
+            }
+
             "stopCurrentActivity" -> {
                 var activity = activityManager.stopCurrentActivity()
                 if (activity != null) {

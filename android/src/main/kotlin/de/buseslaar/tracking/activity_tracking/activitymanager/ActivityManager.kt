@@ -2,10 +2,8 @@ package de.buseslaar.tracking.activity_tracking.activitymanager
 
 
 import android.Manifest
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.location.Location
 import android.util.Log
@@ -17,7 +15,6 @@ import de.buseslaar.tracking.activity_tracking.activity.WalkingActivity
 import de.buseslaar.tracking.activity_tracking.model.Activity
 import de.buseslaar.tracking.activity_tracking.model.ActivityType
 import de.buseslaar.tracking.activity_tracking.model.Event
-import de.buseslaar.tracking.activity_tracking.notification.NotificationsHelper
 import de.buseslaar.tracking.activity_tracking.notification.receiver.ActivityBroadcastReceiver
 import de.buseslaar.tracking.activity_tracking.service.BikingForegroundService
 import de.buseslaar.tracking.activity_tracking.service.ForegroundService
@@ -78,25 +75,36 @@ class ActivityManager {
         return currentActivity?.parseToJSON().toString()
     }
 
+    fun pauseCurrentActivity(): Boolean {
+        Log.d(TAG, "Current Activity: " + currentActivity?.type)
+
+        if (currentActivity == null) return false
+
+        if (isPaused) {
+            this.currentActivity?.startSensors(context!!)
+            isPaused = false
+        } else {
+            this.currentActivity?.stopSensors(context!!)
+            isPaused = true
+        }
+        this.foregroundService?.updateNotification(
+            context!!,
+            currentActivity?.type.toString(),
+            generateNotificationDescription(),
+            createTrackingActions(context!!)
+        );
+
+        return true;
+    }
+
     fun stopCurrentActivity(): Activity? {
-        Log.d(TAG, "Current Activity: " + currentActivity?.type)//(currentActivity?.steps);
+        Log.d(TAG, "Current Activity: " + currentActivity?.type)
         if (currentActivity == null) return null
         currentActivity?.endDateTime = System.currentTimeMillis()
 
         this.foregroundService?.stopService(context!!, {
             this.currentActivity!!.stopSensors(context!!);
         });
-
-        var notificationManager =
-            context?.getSystemService(NOTIFICATION_SERVICE) as NotificationManager;
-        notificationManager.notify(
-            System.currentTimeMillis().toInt(), NotificationsHelper.buildNotification(
-                context!!,
-                "Finished: ${currentActivity?.type.toString()}",
-                generateNotificationDescription()
-
-            )
-        );
         return currentActivity
     }
 

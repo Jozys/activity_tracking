@@ -86,5 +86,11 @@ class ActivityTrackingPlugin : FlutterPlugin, MethodCallHandler {
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+        eventChannel.setStreamHandler(null)
+        activityManager.stopCurrentActivity()
+        activityManager.eventSink = null
+        activityManager.isPaused = false
+        activityManager.currentActivity?.stopSensors(context.applicationContext)
+        activityManager.foregroundService?.stopSelf()
     }
 }

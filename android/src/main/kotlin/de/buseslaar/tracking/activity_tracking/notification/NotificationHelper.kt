@@ -80,7 +80,7 @@ object NotificationsHelper {
                 "Speed: " + ((currentActivity.locations.entries.maxByOrNull { it.key }?.value?.speed?.toString()) + " km/h ")
 
         notification =
-            notification + " Distance: " + (currentActivity?.distance).toString() + " km";
+            notification + " Distance: " + (currentActivity.distance).toString() + " km";
         return notification;
     }
 

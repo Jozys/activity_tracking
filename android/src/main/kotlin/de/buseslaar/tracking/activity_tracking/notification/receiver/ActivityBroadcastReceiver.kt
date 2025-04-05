@@ -10,6 +10,7 @@ import android.content.Intent
 import androidx.annotation.RequiresPermission
 import de.buseslaar.tracking.activity_tracking.activitymanager.ActivityManager
 import de.buseslaar.tracking.activity_tracking.model.Event
+import de.buseslaar.tracking.activity_tracking.notification.NotificationsHelper
 
 class ActivityBroadcastReceiver() : BroadcastReceiver() {
 
@@ -42,7 +43,8 @@ class ActivityBroadcastReceiver() : BroadcastReceiver() {
                     activityManagerInstance!!.foregroundService?.updateNotification(
                         context,
                         activityManagerInstance!!.currentActivity?.type.toString(),
-                        activityManagerInstance!!.generateNotificationDescription(),
+                        NotificationsHelper.generateActivityNotificationDescription(
+                            activityManagerInstance!!.currentActivity),
                         activityManagerInstance!!.createTrackingActions(context)
                     )
                     activityManagerInstance!!.eventSink?.success(
@@ -63,13 +65,24 @@ class ActivityBroadcastReceiver() : BroadcastReceiver() {
                     activityManagerInstance!!.stopCurrentActivity()
                     val notificationManager =
                         context.applicationContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-                    notificationManager.cancelAll()
+                    notificationManager.cancel(1)
                     activityManagerInstance!!.eventSink?.success(
                         activityManagerInstance?.constructJsonString(
                             Event.STOP,
                             null
                         )
                     )
+
+                    val finishedNotification = NotificationsHelper.buildNotification(
+                            context.applicationContext,
+                            "Activity Tracking Finished",
+                            NotificationsHelper.generateActivityNotificationDescription(
+                                activityManagerInstance!!.currentActivity),
+                            emptyList()
+                        )
+
+                    notificationManager.notify(2, finishedNotification);
+
                 }
             }
         }

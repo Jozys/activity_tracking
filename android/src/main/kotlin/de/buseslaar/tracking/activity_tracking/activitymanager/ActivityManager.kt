@@ -2,18 +2,21 @@ package de.buseslaar.tracking.activity_tracking.activitymanager
 
 
 import android.Manifest
-import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
-import android.content.Context.NOTIFICATION_SERVICE
+import android.content.Intent
 import android.location.Location
 import android.util.Log
 import androidx.annotation.RequiresPermission
+import androidx.core.app.NotificationCompat
 import de.buseslaar.tracking.activity_tracking.activity.BikingActivity
 import de.buseslaar.tracking.activity_tracking.activity.RunningActivity
 import de.buseslaar.tracking.activity_tracking.activity.WalkingActivity
 import de.buseslaar.tracking.activity_tracking.model.Activity
 import de.buseslaar.tracking.activity_tracking.model.ActivityType
+import de.buseslaar.tracking.activity_tracking.model.Event
 import de.buseslaar.tracking.activity_tracking.notification.NotificationsHelper
+import de.buseslaar.tracking.activity_tracking.notification.receiver.ActivityBroadcastReceiver
 import de.buseslaar.tracking.activity_tracking.service.BikingForegroundService
 import de.buseslaar.tracking.activity_tracking.service.ForegroundService
 import de.buseslaar.tracking.activity_tracking.service.RunningForegroundService
@@ -26,7 +29,8 @@ private const val TAG = "ACTIVITY_MANAGER"
 
 class ActivityManager {
 
-    private var currentActivity: Activity? = null
+    var currentActivity: Activity? = null
+    var isPaused: Boolean = false
     var eventSink: EventChannel.EventSink? = null
     var context: Context? = null;
     var foregroundService: ForegroundService? = null;
@@ -37,7 +41,7 @@ class ActivityManager {
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     fun startActivity(type: String): String {
-        var activityType = ActivityType.valueOf(type);
+        val activityType = ActivityType.valueOf(type);
         if (context != null) {
             when (activityType) {
                 ActivityType.WALKING -> {
@@ -72,36 +76,48 @@ class ActivityManager {
         return currentActivity?.parseToJSON().toString()
     }
 
+    fun togglePauseActivity(): Boolean {
+        Log.d(TAG, "Current Activity: " + currentActivity?.type)
+
+        if (currentActivity == null) return false
+
+        if (isPaused) {
+            this.currentActivity?.startSensors(context!!)
+            isPaused = false
+        } else {
+            this.currentActivity?.stopSensors(context!!)
+            isPaused = true
+        }
+        this.foregroundService?.updateNotification(
+            context!!,
+            currentActivity?.type.toString(),
+            NotificationsHelper.generateActivityNotificationDescription(currentActivity),
+            createTrackingActions(context!!)
+        );
+
+        return true;
+    }
+
     fun stopCurrentActivity(): Activity? {
-        Log.d(TAG, "Current Activity: " + currentActivity?.type)//(currentActivity?.steps);
+        Log.d(TAG, "Current Activity: " + currentActivity?.type)
         if (currentActivity == null) return null
         currentActivity?.endDateTime = System.currentTimeMillis()
 
         this.foregroundService?.stopService(context!!, {
             this.currentActivity!!.stopSensors(context!!);
         });
-
-        var notificationManager =
-            context?.getSystemService(NOTIFICATION_SERVICE) as NotificationManager;
-        notificationManager.notify(
-            System.currentTimeMillis().toInt(), NotificationsHelper.buildNotification(
-                context!!,
-                "Finished: ${currentActivity?.type.toString()}",
-                generateNotificationDescription()
-
-            )
-        );
         return currentActivity
     }
 
     fun onStepChanged(addedSteps: Int) {
         currentActivity?.steps = currentActivity?.steps?.plus(addedSteps)!!
         Log.d(TAG, "Steps: " + currentActivity?.steps)
-        eventSink?.success(constructJsonString<Int>("step", addedSteps));
+        eventSink?.success(constructJsonString<Int>(Event.STEP, addedSteps));
         this.foregroundService?.updateNotification(
             context!!,
             currentActivity?.type.toString(),
-            generateNotificationDescription()
+            NotificationsHelper.generateActivityNotificationDescription(currentActivity),
+            createTrackingActions(context!!)
         );
     }
 
@@ -143,14 +159,15 @@ class ActivityManager {
             this.foregroundService?.updateNotification(
                 context!!,
                 currentActivity?.type.toString(),
-                generateNotificationDescription()
+                NotificationsHelper.generateActivityNotificationDescription(currentActivity),
+                createTrackingActions(context!!)
             );
             var lastLocationEntry =
                 currentActivity?.locations?.entries?.maxByOrNull { it.key };
             if (lastLocationEntry != null) {
                 eventSink?.success(
                     constructJsonString<MutableMap.MutableEntry<Long, de.buseslaar.tracking.activity_tracking.model.Location>>(
-                        "location",
+                        Event.LOCATION,
                         lastLocationEntry
                     )
                 );
@@ -158,44 +175,24 @@ class ActivityManager {
 
             eventSink?.success(
                 constructJsonString<Double?>(
-                    "distance",
+                    Event.DISTANCE,
                     currentActivity?.distance
                 )
             )
         }
     }
 
-    fun generateNotificationDescription(): String {
-        var notification = "";
-        if (currentActivity == null) return notification;
-        when (currentActivity?.type) {
-            ActivityType.WALKING, ActivityType.RUNNING -> {
-                notification = "Steps: " + currentActivity?.steps.toString() + ";"
-            }
-
-            else -> {}
-        }
-        if (currentActivity?.locations?.isEmpty() == true) return ""
-        notification = notification +
-                "Speed: " + ((currentActivity?.locations?.entries?.maxByOrNull { it.key }?.value?.speed?.toString()) + " km/h;")
-
-        if (currentActivity?.distance == null) return notification;
-        notification =
-            notification + " Distance: " + (currentActivity?.distance).toString() + " km";
-        return notification;
 
 
-    }
-
-    private fun <T> constructJsonString(key: String, data: T): String {
+    fun <T> constructJsonString(key: Event, data: T): String {
         var json = JSONObject();
-        json.put("type", key);
+        json.put("type", key.type);
         when (key) {
-            "step" -> {
+            Event.STEP -> {
                 json.put("data", data);
             }
 
-            "location" -> {
+            Event.LOCATION -> {
                 var rawLocationData =
                     data as MutableMap.MutableEntry<Long, de.buseslaar.tracking.activity_tracking.model.Location>;
                 val locationData = JSONObject();
@@ -206,15 +203,19 @@ class ActivityManager {
                     "speed",
                     rawLocationData.value.speed.times(10.0).roundToInt().div(10.0).toDouble()
                 );
-                
+
                 locationData.put("pace", rawLocationData.value.pace.toDouble());
                 val locationTime = JSONObject();
                 locationTime.put(rawLocationData.key.toString(), locationData);
                 json.put("data", locationTime);
             }
 
-            "distance" -> {
+            Event.DISTANCE -> {
                 json.put("data", data);
+            }
+
+            Event.STOP, Event.PAUSE, Event.RESUME -> {
+                json.put("data", currentActivity?.parseToJSON());
             }
 
             else -> {
@@ -225,6 +226,62 @@ class ActivityManager {
             }
         }
         return json.toString();
+    }
+
+
+    internal fun createTrackingActions(context: Context): List<NotificationCompat.Action> {
+        val actions = mutableListOf<NotificationCompat.Action>()
+        ActivityBroadcastReceiver.setActivityManager(this)
+
+        // Pause Action
+        val pauseIntent = Intent(context, ActivityBroadcastReceiver::class.java).apply {
+            action = "${context.applicationContext.packageName}.PAUSE"
+        }
+        val pausePendingIntent = PendingIntent.getBroadcast(
+            context,
+            0,
+            pauseIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val pauseIcon = if (isPaused) {
+            android.R.drawable.ic_media_play
+        } else {
+            android.R.drawable.ic_media_pause
+        }
+
+        val pauseText = if (isPaused) {
+            "Resume"
+        } else {
+            "Pause"
+        }
+
+        val pauseAction = NotificationCompat.Action(
+            pauseIcon,
+            pauseText,
+            pausePendingIntent
+        )
+        actions.add(pauseAction)
+
+        // Stop Action
+        val stopIntent = Intent(context, ActivityBroadcastReceiver::class.java).apply {
+            action = "${context.applicationContext.packageName}.STOP"
+        }
+        val stopPendingIntent = PendingIntent.getBroadcast(
+            context,
+            1,
+            stopIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val stopAction = NotificationCompat.Action(
+            android.R.drawable.ic_media_ff,
+            "Stop",
+            stopPendingIntent
+        )
+        actions.add(stopAction)
+
+        return actions
     }
 
 }

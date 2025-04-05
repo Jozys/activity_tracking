@@ -37,7 +37,7 @@ abstract class ActivityTrackingPlatform extends PlatformInterface {
     throw UnimplementedError("stopCurrentActivity has not been implemented");
   }
 
-  Future<bool?> pauseCurrentActivity() {
+  Future<bool?> togglePauseActivity() {
     throw UnimplementedError("pauseCurrentActivity has not been implemented");
   }
 

@@ -28,7 +28,7 @@ class MockActivityTrackingPlatform
   }
 
   @override
-  Future<bool?> pauseCurrentActivity() {
+  Future<bool?> togglePauseActivity() {
     throw UnimplementedError();
   }
 }

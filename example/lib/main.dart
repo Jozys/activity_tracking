@@ -128,7 +128,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> pauseTracking() async {
     String? activityState;
     try {
-      var success = await _activityTrackingPlugin.pauseCurrentActivity();
+      var success = await _activityTrackingPlugin.togglePauseActivity();
       if (success != null && success == true) {
         activityState = "Paused";
         isRecording = !isRecording;

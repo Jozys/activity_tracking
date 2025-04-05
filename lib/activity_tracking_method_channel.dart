@@ -16,23 +16,27 @@ class MethodChannelActivityTracking extends ActivityTrackingPlatform {
 
   @override
   Future<String?> getPlatformVersion() async {
-    final version =
-        await methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version = await methodChannel.invokeMethod<String>(
+      'getPlatformVersion',
+    );
     return version;
   }
 
   @override
   Future<Activity?> startActivity(ActivityType type) async {
     final started = await methodChannel.invokeMethod<String>(
-        'startActivity', <String, dynamic>{'type': type.name});
+      'startActivity',
+      <String, dynamic>{'type': type.name},
+    );
 
     return Activity.fromJson(jsonDecode(started!));
   }
 
   @override
   Future<Activity?> stopCurrentActivity() async {
-    final stopped =
-        await methodChannel.invokeMethod<String>('stopCurrentActivity');
+    final stopped = await methodChannel.invokeMethod<String>(
+      'stopCurrentActivity',
+    );
     try {
       if (stopped != null && stopped.isNotEmpty) {
         var activity = Activity.fromJson(jsonDecode(stopped));
@@ -45,8 +49,8 @@ class MethodChannelActivityTracking extends ActivityTrackingPlatform {
   }
 
   @override
-  Future<bool?> pauseCurrentActivity() async {
-    return await methodChannel.invokeMethod<bool?>('pauseCurrentActivity');
+  Future<bool?> togglePauseActivity() async {
+    return await methodChannel.invokeMethod<bool?>('togglePauseActivity');
   }
 
   @override

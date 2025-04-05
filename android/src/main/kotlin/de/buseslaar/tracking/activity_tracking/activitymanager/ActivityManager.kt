@@ -76,7 +76,7 @@ class ActivityManager {
         return currentActivity?.parseToJSON().toString()
     }
 
-    fun pauseCurrentActivity(): Boolean {
+    fun togglePauseActivity(): Boolean {
         Log.d(TAG, "Current Activity: " + currentActivity?.type)
 
         if (currentActivity == null) return false

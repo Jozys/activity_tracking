@@ -51,20 +51,20 @@ class ActivityTrackingPlugin : FlutterPlugin, MethodCallHandler {
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onMethodCall(call: MethodCall, result: Result) {
-        var activityManager = this.activityManager
+        val activityManager = this.activityManager
         when (call.method) {
             "getPlatformVersion" -> {
                 result.success("Android ${Build.VERSION.RELEASE}")
             }
 
             "startActivity" -> {
-                var activityType =
+                val activityType =
                     activityManager.startActivity(call.argument<String>("type").toString())
                 result.success(activityType)
             }
 
-            "pauseCurrentActivity" -> {
-                var activity = activityManager.pauseCurrentActivity()
+            "togglePauseActivity" -> {
+                val activity = activityManager.togglePauseActivity()
                 result.success(activity)
             }
 

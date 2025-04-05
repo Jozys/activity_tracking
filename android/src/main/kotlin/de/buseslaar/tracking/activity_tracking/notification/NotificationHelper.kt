@@ -7,6 +7,8 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import androidx.core.app.NotificationCompat
+import de.buseslaar.tracking.activity_tracking.model.Activity
+import de.buseslaar.tracking.activity_tracking.model.ActivityType
 
 object NotificationsHelper {
 
@@ -61,6 +63,25 @@ object NotificationsHelper {
             notification.addAction(action)
         }
         return notification.build();
+    }
+
+    fun generateActivityNotificationDescription(currentActivity: Activity?): String {
+        var notification = "";
+        if (currentActivity == null) return ""
+        when (currentActivity.type) {
+            ActivityType.WALKING, ActivityType.RUNNING -> {
+                notification = "Steps: " + currentActivity.steps.toString() + " "
+            }
+
+            else -> {}
+        }
+        if (currentActivity.locations.isEmpty()) return ""
+        notification = notification +
+                "Speed: " + ((currentActivity.locations.entries.maxByOrNull { it.key }?.value?.speed?.toString()) + " km/h ")
+
+        notification =
+            notification + " Distance: " + (currentActivity?.distance).toString() + " km";
+        return notification;
     }
 
 }

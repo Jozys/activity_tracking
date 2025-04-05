@@ -15,6 +15,7 @@ import de.buseslaar.tracking.activity_tracking.activity.WalkingActivity
 import de.buseslaar.tracking.activity_tracking.model.Activity
 import de.buseslaar.tracking.activity_tracking.model.ActivityType
 import de.buseslaar.tracking.activity_tracking.model.Event
+import de.buseslaar.tracking.activity_tracking.notification.NotificationsHelper
 import de.buseslaar.tracking.activity_tracking.notification.receiver.ActivityBroadcastReceiver
 import de.buseslaar.tracking.activity_tracking.service.BikingForegroundService
 import de.buseslaar.tracking.activity_tracking.service.ForegroundService
@@ -40,7 +41,7 @@ class ActivityManager {
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     fun startActivity(type: String): String {
-        var activityType = ActivityType.valueOf(type);
+        val activityType = ActivityType.valueOf(type);
         if (context != null) {
             when (activityType) {
                 ActivityType.WALKING -> {
@@ -90,7 +91,7 @@ class ActivityManager {
         this.foregroundService?.updateNotification(
             context!!,
             currentActivity?.type.toString(),
-            generateNotificationDescription(),
+            NotificationsHelper.generateActivityNotificationDescription(currentActivity),
             createTrackingActions(context!!)
         );
 
@@ -115,7 +116,7 @@ class ActivityManager {
         this.foregroundService?.updateNotification(
             context!!,
             currentActivity?.type.toString(),
-            generateNotificationDescription(),
+            NotificationsHelper.generateActivityNotificationDescription(currentActivity),
             createTrackingActions(context!!)
         );
     }
@@ -158,7 +159,7 @@ class ActivityManager {
             this.foregroundService?.updateNotification(
                 context!!,
                 currentActivity?.type.toString(),
-                generateNotificationDescription(),
+                NotificationsHelper.generateActivityNotificationDescription(currentActivity),
                 createTrackingActions(context!!)
             );
             var lastLocationEntry =
@@ -181,27 +182,7 @@ class ActivityManager {
         }
     }
 
-    fun generateNotificationDescription(): String {
-        var notification = "";
-        if (currentActivity == null) return notification;
-        when (currentActivity?.type) {
-            ActivityType.WALKING, ActivityType.RUNNING -> {
-                notification = "Steps: " + currentActivity?.steps.toString() + ";"
-            }
 
-            else -> {}
-        }
-        if (currentActivity?.locations?.isEmpty() == true) return ""
-        notification = notification +
-                "Speed: " + ((currentActivity?.locations?.entries?.maxByOrNull { it.key }?.value?.speed?.toString()) + " km/h;")
-
-        if (currentActivity?.distance == null) return notification;
-        notification =
-            notification + " Distance: " + (currentActivity?.distance).toString() + " km";
-        return notification;
-
-
-    }
 
     fun <T> constructJsonString(key: Event, data: T): String {
         var json = JSONObject();
@@ -252,7 +233,6 @@ class ActivityManager {
         val actions = mutableListOf<NotificationCompat.Action>()
         ActivityBroadcastReceiver.setActivityManager(this)
 
-
         // Pause Action
         val pauseIntent = Intent(context, ActivityBroadcastReceiver::class.java).apply {
             action = "${context.applicationContext.packageName}.PAUSE"
@@ -264,13 +244,13 @@ class ActivityManager {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        var pauseIcon = if (isPaused) {
+        val pauseIcon = if (isPaused) {
             android.R.drawable.ic_media_play
         } else {
             android.R.drawable.ic_media_pause
         }
 
-        var pauseText = if (isPaused) {
+        val pauseText = if (isPaused) {
             "Resume"
         } else {
             "Pause"

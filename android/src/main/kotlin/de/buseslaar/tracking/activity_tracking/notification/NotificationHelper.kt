@@ -1,5 +1,6 @@
 package de.buseslaar.tracking.activity_tracking.notification
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -7,6 +8,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import androidx.core.app.NotificationCompat
+import de.buseslaar.tracking.activity_tracking.R
 import de.buseslaar.tracking.activity_tracking.model.Activity
 import de.buseslaar.tracking.activity_tracking.model.ActivityType
 
@@ -65,23 +67,71 @@ object NotificationsHelper {
         return notification.build();
     }
 
-    fun generateActivityNotificationDescription(currentActivity: Activity?): String {
+
+    fun generateActivityNotificationDescription(
+        currentActivity: Activity?,
+        context: Context,
+        duration: Boolean = false
+    ): String {
         var notification = "";
-        if (currentActivity == null) return ""
-        when (currentActivity.type) {
+        if (currentActivity == null) return notification;
+        when (currentActivity?.type) {
             ActivityType.WALKING, ActivityType.RUNNING -> {
-                notification = "Steps: " + currentActivity.steps.toString() + " "
+                notification =
+                    "${
+                        getLocalizedString(
+                            R.string.steps,
+                            context
+                        )
+                    }: " + currentActivity?.steps.toString() + " "
             }
 
             else -> {}
         }
-        if (currentActivity.locations.isEmpty()) return ""
+        if (currentActivity?.locations?.isEmpty() == true) return ""
         notification = notification +
-                "Speed: " + ((currentActivity.locations.entries.maxByOrNull { it.key }?.value?.speed?.toString()) + " km/h ")
+                "${
+                    getLocalizedString(
+                        R.string.speed,
+                        context
+                    )
+                }: " + ((currentActivity?.locations?.entries?.maxByOrNull { it.key }?.value?.speed?.toString()) + " km/h ")
 
+        if (currentActivity.distance == null) return notification;
         notification =
-            notification + " Distance: " + (currentActivity.distance).toString() + " km";
+            notification + " ${
+                getLocalizedString(
+                    R.string.distance,
+                    context
+                )
+            }: " + (currentActivity?.distance).toString() + " km";
+
+        if (duration) {
+            notification = notification + " ${
+                getLocalizedString(
+                    R.string.duration,
+                    context
+                )
+            }: " + currentActivity.endDateTime?.minus(currentActivity.startDateTime!!)
+                ?.let { formateDateToHours(it) } + "";
+        }
         return notification;
+    }
+
+    fun getLocalizedString(resourceId: Int, context: Context): String {
+        return context.getString(resourceId).toString();
+    }
+
+    @SuppressLint("DefaultLocale")
+    fun formateDateToHours(millis: Long): String {
+        // Millis to seconds
+        val fullSeconds = (millis / 1000)
+
+        val hours = fullSeconds / 3600
+        val minutes = (fullSeconds % 3600) / 60
+        val seconds = fullSeconds % 60
+
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds)
     }
 
 }

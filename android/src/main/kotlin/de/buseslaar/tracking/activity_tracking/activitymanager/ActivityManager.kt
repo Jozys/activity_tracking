@@ -9,6 +9,7 @@ import android.location.Location
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
+import de.buseslaar.tracking.activity_tracking.R
 import de.buseslaar.tracking.activity_tracking.activity.BikingActivity
 import de.buseslaar.tracking.activity_tracking.activity.RunningActivity
 import de.buseslaar.tracking.activity_tracking.activity.WalkingActivity
@@ -88,10 +89,11 @@ class ActivityManager {
             this.currentActivity?.stopSensors(context!!)
             isPaused = true
         }
+        val resourceId: Int = currentActivity?.type?.resourceId ?: R.string.UNKNOWN
         this.foregroundService?.updateNotification(
             context!!,
-            currentActivity?.type.toString(),
-            NotificationsHelper.generateActivityNotificationDescription(currentActivity),
+            context!!.getString(resourceId),
+            NotificationsHelper.generateActivityNotificationDescription(currentActivity, context!!),
             createTrackingActions(context!!)
         );
 
@@ -113,10 +115,11 @@ class ActivityManager {
         currentActivity?.steps = currentActivity?.steps?.plus(addedSteps)!!
         Log.d(TAG, "Steps: " + currentActivity?.steps)
         eventSink?.success(constructJsonString<Int>(Event.STEP, addedSteps));
+        val resourceId: Int = currentActivity?.type?.resourceId ?: R.string.UNKNOWN
         this.foregroundService?.updateNotification(
             context!!,
-            currentActivity?.type.toString(),
-            NotificationsHelper.generateActivityNotificationDescription(currentActivity),
+            context!!.getString(resourceId),
+            NotificationsHelper.generateActivityNotificationDescription(currentActivity, context!!),
             createTrackingActions(context!!)
         );
     }
@@ -156,10 +159,14 @@ class ActivityManager {
                     location.speed
                 )
             )
+            val resourceId: Int = currentActivity?.type?.resourceId ?: R.string.UNKNOWN
             this.foregroundService?.updateNotification(
                 context!!,
-                currentActivity?.type.toString(),
-                NotificationsHelper.generateActivityNotificationDescription(currentActivity),
+                context!!.getString(resourceId),
+                NotificationsHelper.generateActivityNotificationDescription(
+                    currentActivity,
+                    context!!
+                ),
                 createTrackingActions(context!!)
             );
             var lastLocationEntry =
@@ -181,8 +188,6 @@ class ActivityManager {
             )
         }
     }
-
-
 
     fun <T> constructJsonString(key: Event, data: T): String {
         var json = JSONObject();
@@ -233,6 +238,7 @@ class ActivityManager {
         val actions = mutableListOf<NotificationCompat.Action>()
         ActivityBroadcastReceiver.setActivityManager(this)
 
+
         // Pause Action
         val pauseIntent = Intent(context, ActivityBroadcastReceiver::class.java).apply {
             action = "${context.applicationContext.packageName}.PAUSE"
@@ -251,9 +257,9 @@ class ActivityManager {
         }
 
         val pauseText = if (isPaused) {
-            "Resume"
+            context.getString(R.string.resume)
         } else {
-            "Pause"
+            context.getString(R.string.pause)
         }
 
         val pauseAction = NotificationCompat.Action(
@@ -276,13 +282,12 @@ class ActivityManager {
 
         val stopAction = NotificationCompat.Action(
             android.R.drawable.ic_media_ff,
-            "Stop",
+            context.getString(R.string.stop),
             stopPendingIntent
         )
         actions.add(stopAction)
 
         return actions
     }
-
 }
 

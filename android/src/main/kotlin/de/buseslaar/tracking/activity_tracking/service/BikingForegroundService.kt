@@ -7,7 +7,7 @@ import de.buseslaar.tracking.activity_tracking.model.ActivityType
 class BikingForegroundService() : ForegroundService() {
 
     override var notificationTitle: String = ActivityType.BIKING.type;
-    override var notificationText: String = "Distance: 0, Speed: 0";
+    override var notificationText: String = "Loading...";
     private var TAG = "BIKING_FOREGROUND_SERVICE";
     private var context: Context? = null
 

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="steps">Steps</string>
+    <string name="distance">Distance</string>
+    <string name="speed">Speed</string>
+    <string name="duration">Duration</string>
+
+
+    <string name="BIKING">Biking</string>
+    <string name="WALKING">Walking</string>
+    <string name="RUNNING">Running</string>
+    <string name="UNKNOWN">Unknown</string>
+
+    <string name="tracking_stopped">Recording finished</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="stop">Stop</string>
+</resources>

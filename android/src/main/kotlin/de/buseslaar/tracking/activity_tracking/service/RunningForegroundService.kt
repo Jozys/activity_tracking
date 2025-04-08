@@ -7,7 +7,7 @@ import de.buseslaar.tracking.activity_tracking.model.ActivityType
 class RunningForegroundService : WalkingForegroundService {
 
     override var notificationTitle: String = ActivityType.RUNNING.type
-    override var notificationText: String = "Steps: 0"
+    override var notificationText: String = "Loading..."
     private var TAG = "RUNNING_FOREGROUND_SERVICE"
 
     constructor() : super() {

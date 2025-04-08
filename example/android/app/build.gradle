@@ -15,6 +15,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    androidResources {
+        generateLocaleConfig = true
+    }
+    
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8
     }

@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import androidx.annotation.RequiresPermission
+import de.buseslaar.tracking.activity_tracking.R
 import de.buseslaar.tracking.activity_tracking.activitymanager.ActivityManager
 import de.buseslaar.tracking.activity_tracking.model.Event
 import de.buseslaar.tracking.activity_tracking.notification.NotificationsHelper
@@ -40,11 +41,17 @@ class ActivityBroadcastReceiver() : BroadcastReceiver() {
                         activityManagerInstance!!.currentActivity?.stopSensors(context.applicationContext)
                     }
                     activityManagerInstance!!.isPaused = !activityManagerInstance!!.isPaused
+
+                    // Update notification
+                    val resourceId: Int =
+                        activityManagerInstance!!.currentActivity?.type?.resourceId
+                            ?: R.string.UNKNOWN
                     activityManagerInstance!!.foregroundService?.updateNotification(
                         context,
-                        activityManagerInstance!!.currentActivity?.type.toString(),
+                        context.getString(resourceId),
                         NotificationsHelper.generateActivityNotificationDescription(
-                            activityManagerInstance!!.currentActivity),
+                            activityManagerInstance!!.currentActivity, context
+                        ),
                         activityManagerInstance!!.createTrackingActions(context)
                     )
                     activityManagerInstance!!.eventSink?.success(
@@ -74,12 +81,13 @@ class ActivityBroadcastReceiver() : BroadcastReceiver() {
                     )
 
                     val finishedNotification = NotificationsHelper.buildNotification(
-                            context.applicationContext,
-                            "Activity Tracking Finished",
-                            NotificationsHelper.generateActivityNotificationDescription(
-                                activityManagerInstance!!.currentActivity),
-                            emptyList()
-                        )
+                        context.applicationContext,
+                        context.getString(R.string.tracking_stopped),
+                        NotificationsHelper.generateActivityNotificationDescription(
+                            activityManagerInstance!!.currentActivity, context, true
+                        ),
+                        emptyList()
+                    )
 
                     notificationManager.notify(2, finishedNotification);
 

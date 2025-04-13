@@ -56,7 +56,7 @@ class ActivityBroadcastReceiver() : BroadcastReceiver() {
                     )
                     activityManagerInstance!!.eventSink?.success(
                         activityManagerInstance?.constructJsonString(
-                            if (activityManagerInstance!!.isPaused) {
+                            if (!activityManagerInstance!!.isPaused) {
                                 Event.RESUME
                             } else {
                                 Event.PAUSE
